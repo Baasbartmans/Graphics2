@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,12 @@ namespace template
 {
     class Sphere : Primitive
     {
-        public Sphere()
-        {
+        public float radius;
 
+        public Sphere(Vector3 position, float radius): base(position)
+        {
+            base.position = position;
+            this.radius = radius;
         }
     }
 }

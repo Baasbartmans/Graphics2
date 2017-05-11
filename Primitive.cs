@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,11 @@ namespace template
 {
     class Primitive
     {
-        public Primitive()
-        {
+        protected Vector3 position;
 
+        public Primitive(Vector3 position)
+        {
+            this.position = position;
         }
     }
 }

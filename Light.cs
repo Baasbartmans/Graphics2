@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,13 @@ namespace template
 {
     class Light
     {
+        public Vector3 position;
+        public Vector3 intensity;
+        private float red, green, blue;
+
         public Light()
         {
-
+            intensity = new Vector3(red, green, blue);
         }
     }
 }

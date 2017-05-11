@@ -8,6 +8,9 @@ namespace template
 {
     class Scene
     {
+        public List<Light> lights = new List<Light>();
+        public List<Primitive> primitives = new List<Primitive>();
+
         public Scene()
         {
 
