@@ -49,7 +49,8 @@ namespace Template
 		}
 		protected override void OnRenderFrame( FrameEventArgs e )
 		{
-			// called once per frame; render
+            // called once per frame; render
+            
 			game.Tick();
 			if (terminated) 
 			{
