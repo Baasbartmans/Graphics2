@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Template;
+using template;
 
-namespace template
+namespace Template
 {
     class Raytracer
     {
