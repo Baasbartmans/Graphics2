@@ -42,7 +42,17 @@ namespace Template
             screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
-            screen.pixels[screen.width / 2 + ((cameraX / xWorldSize) * (screen.width / 2)) /*x <-  and y ->*/] = 0x00ff00;
+            screen.pixels[screen.width / 2 + ((cameraX / xWorldSize) * (screen.width / 2)) /*x <-- and z -->*/ + (cameraZ / zWorldSize) * (screen.width * screen.width)] = 0x00ff00;
+        }
+
+        public int TX(float x)
+        {
+            return (int)x;
+        }
+
+        public int TZ(float z)
+        {
+            return (int)z;
         }
 
     }
