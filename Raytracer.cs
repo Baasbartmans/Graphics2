@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using template;
 
 namespace Template
 {
@@ -24,7 +25,7 @@ namespace Template
             Render();
         }
 
-        public void Render()
+        public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
 
 
