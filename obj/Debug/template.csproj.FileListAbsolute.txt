@@ -1,1 +1,2 @@
 D:\Documents\Graphics2\bin\Debug\template.exe.config
+D:\School\Graphics\P2 Ray Tracer GitHub\bin\Debug\template.exe.config
