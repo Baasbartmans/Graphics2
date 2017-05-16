@@ -12,7 +12,7 @@ namespace Template
         public Surface screen;
         public Scene scene;
         public Camera cam;
-        public Surface surf;
+        public Surface displaySurf;
 
         public Raytracer()
         {
@@ -25,7 +25,7 @@ namespace Template
         {
             screen.Clear(0);
 
-            Render();
+            Render(cam, scene, displaySurf);
         }
 
         public void Render(Camera cam, Scene scene, Surface displaySurf)
