@@ -10,6 +10,9 @@ namespace Template
     class Raytracer
     {
         public Surface screen;
+        public Scene scene;
+        public Camera cam;
+        public Surface surf;
 
         public Raytracer()
         {
