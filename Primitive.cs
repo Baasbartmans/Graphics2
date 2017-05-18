@@ -9,7 +9,8 @@ namespace template
 {
     class Primitive
     {
-        protected Vector3 position;
+        public Vector3 position;
+        public float color;
 
         public Primitive(Vector3 position)
         {
