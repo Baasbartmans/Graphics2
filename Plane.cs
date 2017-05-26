@@ -13,7 +13,7 @@ namespace template
         private float distance;
         private Vector3 normal;
 
-        public Plane(Vector3 position, Vector3 normal, float distance): base(position)
+        public Plane(Vector3 position, Vector3 normal, float distance, Vector3 color): base(position, color)
         {
             base.position = position;
             this.normal = normal;

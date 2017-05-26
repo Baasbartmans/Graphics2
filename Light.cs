@@ -13,8 +13,9 @@ namespace template
         public Vector3 intensity;
         private float red, green, blue;
 
-        public Light()
+        public Light(Vector3 position)
         {
+            this.position = position;
             intensity = new Vector3(red, green, blue);
         }
     }

@@ -10,11 +10,12 @@ namespace template
     class Primitive
     {
         public Vector3 position;
-        public float color;
+        public Vector3 color;
 
-        public Primitive(Vector3 position)
+        public Primitive(Vector3 position, Vector3 color)
         {
             this.position = position;
+            this.color = color;
         }
     }
 }

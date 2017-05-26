@@ -19,6 +19,8 @@ namespace Template
 
         public float div = (1f / 256f);
 
+        const float epsilon = 0.001f;
+
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
 
@@ -37,19 +39,65 @@ namespace Template
 
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
-            //render loop
-            for (int x = 0; x < 512; x++)
+            double distance;
+            int maxDist = 40;
+
+            for (int x = -256; x < 256; x++)
             {
-                for (int y = 0; y < 512; y++)
+                for (int y = -256; y < 256; y++)
                 {
-                    //trek lijn vanaf camera door punt, bekijk of die intersect met sphere
-                    float col = Intersect(cam.position, new Vector3((x - 256) * div, (y - 256) * div, cam.distance));
-                    if (col != -1)
+                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
+                    Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
+
+                    foreach (Sphere s in scene.primitives)
                     {
-                        screen.pixels[y * screen.width + x] = (int)col;
+                        distance = Intersect(cam.position, direction, s);
+
+                        if (distance != 0)
+                        {
+                            int pixelColor;
+                            double distAtten = (DistanceAt(maxDist, (float)distance) / maxDist); // deptmap
+
+                            float lightSum = 0;
+
+                            foreach (Light l in scene.lights)
+                            {
+                                Vector3 point = cam.position + ((float)distance * direction);
+                                Vector3 lightDirection = Vector3.Normalize(l.position - point);
+                                float distLight = Math.Abs(Intersect(point, lightDirection, s));
+
+                                if (scene.primitives.Count > 1)
+                                {
+                                    foreach (Sphere ss in scene.primitives)
+                                    {
+                                        float testDist = Math.Abs(Intersect(point, lightDirection, ss));
+
+                                        //checken of hij intersect met andere dingen dichterbij
+                                        if (testDist == 0 || testDist > epsilon && testDist > distLight)
+                                        {
+                                            lightSum += (1 / (distLight * distLight));
+                                        }
+                                    }
+                                }
+                                //dan is er uberhaubt geen intersection
+                                else
+                                {
+                                    lightSum += (1 / (distLight * distLight));
+                                }
+                            }
+                            if (lightSum > 1)
+                                lightSum = 1;
+
+                            double red = 255 * s.color.X * (distAtten * 0.5 + lightSum * 0.5)
+                                , green = 255 * s.color.Y * (distAtten * 0.5 + lightSum * 0.5)
+                                , blue = 255 * s.color.Z * (distAtten * 0.5 + lightSum * 0.5);
+                            pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
+
+                            screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
+                        }
+
                     }
-                    else
-                        Console.WriteLine(col);
+
                 }
             }
 
@@ -71,43 +119,69 @@ namespace Template
             screen.pixels[screen.width / 2 + ((cameraX / xWorldSize) * (screen.width / 2)) /*x <-- and z -->*/ + (cameraZ / zWorldSize) * (screen.width * screen.width)] = 0x00ff00;
         }
 
-        public float Intersect(Vector3 origin, Vector3 screenPoint)
+        public float DistanceAt(float max, float current)
         {
-            foreach (Sphere s in scene.primitives)
+            if (max - current > 0) return max - current;
+            return 0;
+        }
+
+
+        public float Intersect(Vector3 lineOrigin, Vector3 direction, Sphere sphere)
+        {
+            float discriminant = (Vector3.Dot(direction, lineOrigin - sphere.position) * Vector3.Dot(direction, lineOrigin - sphere.position)) - (lineOrigin - sphere.position).LengthSquared + (sphere.radius * sphere.radius);
+            if (discriminant >= 0)
             {
-                if (Formula(s, cam.position, screenPoint) != -1)
-                {
-                    float scalar = Formula(s, cam.position, screenPoint);
-                    float length = (new Vector3(cam.position + screenPoint * scalar)).Length;
-                    float color = s.color;
-                    if (scalar != 0)
-                    {
-                        int a = 1;
-                    }
-                    return 0xffffff * (1 - (length * maxDist));
-                }
+                float x1 = (-1 * Vector3.Dot(direction, lineOrigin - sphere.position)) + (float)Math.Sqrt(discriminant);
+                float x2 = (-1 * Vector3.Dot(direction, lineOrigin - sphere.position)) - (float)Math.Sqrt(discriminant);
+
+                if (x1 < x2) return x1;
+                return x2;
+            }
+            return 0;
+        }
+
+        public float IntersectPlane(Plane p)
+        {
+            
+
+            return 0;
+        }
+
+
+
+        //public float Intersect(Vector3 origin, Vector3 screenPoint)
+        //{
+        //    foreach (Sphere s in scene.primitives)
+        //    {
+        //        if (Formula(s, cam.position, screenPoint) != -1)
+        //        {
+        //            float scalar = Formula(s, cam.position, screenPoint);
+        //            float length = (new Vector3(cam.position + screenPoint * scalar)).Length;
+        //            float color = s.color;
+        //            return 0xffffff * (1 - (length * maxDist));
+        //        }
                 
 
-                //if ( != -1)
-                //{
-                //    //temp value, moet de cordZ nog vinden..
-                //    float cordZ = 1;
-                //    List<float> shadowColors = new List<float>();
-                //    foreach (Light light in scene.lights)
-                //    {
-                //        shadowColors.Add(ShadowRay(new Vector3(cordX, cordY, cordZ), light));
-                //    }
-                //    //temp shadowColors 1 is wit, 0 is zwart, daartussen komen de kleuren terug.
-                //    return s.color * shadowColors.Average();
-                //}
+        //        //if ( != -1)
+        //        //{
+        //        //    //temp value, moet de cordZ nog vinden..
+        //        //    float cordZ = 1;
+        //        //    List<float> shadowColors = new List<float>();
+        //        //    foreach (Light light in scene.lights)
+        //        //    {
+        //        //        shadowColors.Add(ShadowRay(new Vector3(cordX, cordY, cordZ), light));
+        //        //    }
+        //        //    //temp shadowColors 1 is wit, 0 is zwart, daartussen komen de kleuren terug.
+        //        //    return s.color * shadowColors.Average();
+        //        //}
 
-                //dit doet hij niet
-                return -1;
-            }
-            return -1;
+        //        //dit doet hij niet
+        //        return -1;
+        //    }
+        //    return -1;
 
 
-        }
+        //}
 
         public float ShadowRay(Vector3 origin, Light light)
         {
@@ -119,16 +193,27 @@ namespace Template
 
         public float Formula(Sphere s, Vector3 origin, Vector3 direction)
         {
-            float part1 = 0 - Vector3.Dot(direction, new Vector3(origin - s.position));
-            float discrim = (float)Math.Sqrt(Math.Pow(Vector3.Dot(direction, new Vector3(origin - s.position)), 2) - Math.Pow(new Vector3(origin - s.position).Length, 2) + Math.Pow(s.radius, 2));
-            if (discrim < 0) return -1;
-            if (discrim == 0) return part1 + discrim;
+            
+            Vector3 ogPS = new Vector3(origin - s.position);
+            //float part1 = 0 - Vector3.Dot(direction, ogPS);
+            //float discrim = (float)(Math.Pow(Vector3.Dot(direction, ogPS), 2) - Math.Pow(ogPS.Length, 2) + Math.Pow(s.radius, 2));
+
+            float b = 2 * Vector3.Dot(direction, s.position);
+            float c = -2 * Vector3.Dot(origin, s.position) + s.position.LengthSquared + origin.LengthSquared - (s.radius * s.radius);
+
+            float discrim = (b * b - 4 * c) * 0.5f;
+
+
+            if (discrim < 0)
+                return -1;
+            if (discrim == 0)
+                return - b + (float)Math.Sqrt(discrim);
             else
             {
-                float a = part1 + discrim;
-                float b = part1 - discrim;
-                if (a < b) return a;
-                else return b;
+                float first = - b + (float)Math.Sqrt(discrim);
+                float second = - b - (float)Math.Sqrt(discrim);
+                if (first < second) return first;
+                else return second;
             }
         }
 
