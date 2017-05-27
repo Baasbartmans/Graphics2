@@ -11,11 +11,13 @@ namespace template
     {
         public Vector3 position;
         public Vector3 color;
+        public bool reflective;
 
-        public Primitive(Vector3 position, Vector3 color)
+        public Primitive(Vector3 position, Vector3 color, bool reflective)
         {
             this.position = position;
             this.color = color;
+            this.reflective = reflective;
         }
     }
 }

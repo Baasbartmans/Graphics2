@@ -28,13 +28,13 @@ namespace Template {
             Light light = new Light(new Vector3(-10, 10, 5));
             scene.lights.Add(light);
 
-            Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 30), 1, new Vector3(0.5f, 1, 1));
+            Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 30), 1, new Vector3(0.5f, 1, 1), true);
             scene.primitives.Add(sphere1);
 
-            Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 30), 1, new Vector3(1, 0.5f, 1));
+            Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 30), 1, new Vector3(1, 0.5f, 1), true);
             scene.primitives.Add(sphere3);
 
-            Sphere sphere2 = new Sphere(new Vector3(0, 0, 20), 1, new Vector3(1,1,0.5f));
+            Sphere sphere2 = new Sphere(new Vector3(0, 0, 20), 1, new Vector3(1,1,0.5f), true);
             scene.primitives.Add(sphere2);
 
             

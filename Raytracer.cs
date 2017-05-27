@@ -60,9 +60,10 @@ namespace Template
 
                             float lightSum = 0;
 
+                            Vector3 point = cam.position + ((float)distance * direction);
+
                             foreach (Light l in scene.lights)
                             {
-                                Vector3 point = cam.position + ((float)distance * direction);
                                 Vector3 lightDirection = Vector3.Normalize(l.position - point);
                                 float distLight = Math.Abs(Intersect(point, lightDirection, s));
 
@@ -94,12 +95,49 @@ namespace Template
                             pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
+
+
+                            //debug lines
+                            if (y == 0 && x % 64 == 0)
+                            {
+                                for (int i = 0; i > -1000; i--)
+                                {
+                                    Vector3 position = (direction * i) + new Vector3(768,0,384) + cam.position;// + new Vector3(((int)cam.position.X * -1 + 384), 0, ((int)cam.position.Z + 512 + 256));
+                                    if((int)(position.Z) * screen.width + (int)(position.X) < screen.pixels.Length && (int)(position.Z) * screen.width + (int)(position.X) >= 0 && (direction * i).Length < distance)
+                                    screen.pixels[(int)(position.Z) * screen.width + (int)(position.X)] = 0xffffff;
+                                }  
+                            }
+
+                            if (y == 0)
+                            {
+                                Vector3 position = (direction * (float)distance) + new Vector3(768, 0, 384);
+                                screen.pixels[(int)(position.Z) * screen.width + (int)(position.X)] = 0xffffff;
+                            }
+
+                            //if (y == 0)// % 64 == 0)
+                            //{
+                            //    screen.pixels[(int)(((int)(distance * 100) * 0.1f * -1 + 384) * screen.width) + (x + 512 + 256)] = 0xffffff;
+                            //}
                         }
 
                     }
 
                 }
             }
+
+            //draw cam
+            screen.pixels[((int)cam.position.X * -1 + 384) * screen.width + ((int)cam.position.Z + 512 + 256)] = 0xffffff;
+            screen.pixels[((int)cam.position.X * -1 + 384) * screen.width + ((int)cam.position.Z + 512 + 256 + 1)] = 0xffffff;
+            screen.pixels[((int)cam.position.X * -1 + 384 + 1) * screen.width + ((int)cam.position.Z + 512 + 256)] = 0xffffff;
+            screen.pixels[((int)cam.position.X * -1 + 384 + 1) * screen.width + ((int)cam.position.Z + 512 + 256 + 1)] = 0xffffff;
+
+            //draw screen
+            for (int i = -5; i < 5; i++)
+            {
+                screen.pixels[((int)cam.position.X * -1 - (int)cam.fov + 384) * screen.width + ((int)cam.position.Z + 512 + 256 + i)] = 0xffffff;
+            }
+
+
 
 
             //Variables that are supposed to come from the actual camera and other classes:
@@ -131,6 +169,7 @@ namespace Template
             float discriminant = (Vector3.Dot(direction, lineOrigin - sphere.position) * Vector3.Dot(direction, lineOrigin - sphere.position)) - (lineOrigin - sphere.position).LengthSquared + (sphere.radius * sphere.radius);
             if (discriminant >= 0)
             {
+
                 float x1 = (-1 * Vector3.Dot(direction, lineOrigin - sphere.position)) + (float)Math.Sqrt(discriminant);
                 float x2 = (-1 * Vector3.Dot(direction, lineOrigin - sphere.position)) - (float)Math.Sqrt(discriminant);
 
@@ -142,7 +181,7 @@ namespace Template
 
         public float IntersectPlane(Plane p)
         {
-            
+
 
             return 0;
         }
@@ -160,7 +199,7 @@ namespace Template
         //            float color = s.color;
         //            return 0xffffff * (1 - (length * maxDist));
         //        }
-                
+
 
         //        //if ( != -1)
         //        //{
@@ -193,7 +232,7 @@ namespace Template
 
         public float Formula(Sphere s, Vector3 origin, Vector3 direction)
         {
-            
+
             Vector3 ogPS = new Vector3(origin - s.position);
             //float part1 = 0 - Vector3.Dot(direction, ogPS);
             //float discrim = (float)(Math.Pow(Vector3.Dot(direction, ogPS), 2) - Math.Pow(ogPS.Length, 2) + Math.Pow(s.radius, 2));
@@ -207,11 +246,11 @@ namespace Template
             if (discrim < 0)
                 return -1;
             if (discrim == 0)
-                return - b + (float)Math.Sqrt(discrim);
+                return -b + (float)Math.Sqrt(discrim);
             else
             {
-                float first = - b + (float)Math.Sqrt(discrim);
-                float second = - b - (float)Math.Sqrt(discrim);
+                float first = -b + (float)Math.Sqrt(discrim);
+                float second = -b - (float)Math.Sqrt(discrim);
                 if (first < second) return first;
                 else return second;
             }
