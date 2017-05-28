@@ -25,7 +25,7 @@ namespace Template {
             //raytracer.scene = scene;
             //raytracer.cam = cam;
             //raytracer.displaySurf = displaySurf;
-            Light light = new Light(new Vector3(-10, 10, 5));
+            Light light = new Light(new Vector3(-5f, -3, 15));
             scene.lights.Add(light);
 
             Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 30), 1, new Vector3(0.5f, 1, 1), true);
@@ -34,10 +34,10 @@ namespace Template {
             Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 30), 1, new Vector3(1, 0.5f, 1), true);
             scene.primitives.Add(sphere3);
 
-            Sphere sphere2 = new Sphere(new Vector3(0, 0, 20), 1, new Vector3(1,1,0.5f), true);
+            Sphere sphere2 = new Sphere(new Vector3(0, 0, 20), 1, new Vector3(1, 1, 0.5f), true);
             scene.primitives.Add(sphere2);
 
-            
+
 
             raytracer = new Raytracer(cam, scene, displaySurf);
             raytracer.screen = screen;
