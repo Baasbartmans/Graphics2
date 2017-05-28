@@ -11,7 +11,7 @@ namespace template
     {
         public float radius;
 
-        public Sphere(Vector3 position, float radius, Vector3 color, bool reflective): base(position, color, reflective)
+        public Sphere(Vector3 position, float radius, Vector3 color, bool reflective): base( color, reflective)
         {
             base.position = position;
             this.radius = radius;
