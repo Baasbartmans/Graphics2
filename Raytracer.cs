@@ -49,11 +49,8 @@ namespace Template
                     Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
                     
-                    float shortestDistance = 1000;//100 should be replaced with the length limit of a ray
-
-
-                    foreach (Sphere s in scene.primitives)
-
+                    float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
+                    
                     foreach (Primitive s in scene.primitives)
                     {
                         if (s is Sphere)
