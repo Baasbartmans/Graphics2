@@ -9,13 +9,11 @@ namespace template
 {
     class Plane : Primitive
     {
-        private Vector3 origin;
         private float distance;
-        private Vector3 normal;
+        public Vector3 normal;
 
-        public Plane(Vector3 position, Vector3 normal, float distance, Vector3 color, bool reflective): base(position, color, reflective)
+        public Plane(float distance, Vector3 normal, Vector3 color, bool reflective): base(color, reflective)
         {
-            base.position = position;
             this.normal = normal;
             this.distance = distance;
             
