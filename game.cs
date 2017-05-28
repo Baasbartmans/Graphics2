@@ -19,23 +19,23 @@ namespace Template {
 	    public void Init()
 	    {
             scene = new Scene();
-            //cam = new Camera();
             displaySurf = new Surface(0,0);
 
-            //raytracer.scene = scene;
-            //raytracer.cam = cam;
-            //raytracer.displaySurf = displaySurf;
             Light light = new Light(new Vector3(-5f, -3, 15));
             scene.lights.Add(light);
 
+            Plane plane1 = new Plane(1, new Vector3(0, 1, 0), new Vector3(1, 1, 1), false);
+            scene.primitives.Add(plane1);
+
             Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 30), 1, new Vector3(0.5f, 1, 1), true);
-            scene.primitives.Add(sphere1);
+           scene.primitives.Add(sphere1);
 
             Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 30), 1, new Vector3(1, 0.5f, 1), true);
             scene.primitives.Add(sphere3);
 
             Sphere sphere2 = new Sphere(new Vector3(0, 0, 20), 1, new Vector3(1, 1, 0.5f), true);
             scene.primitives.Add(sphere2);
+
 
 
 

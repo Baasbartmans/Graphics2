@@ -11,11 +11,13 @@ namespace template
     {
         private float distance;
         public Vector3 normal;
+        public Vector3 point;
 
         public Plane(float distance, Vector3 normal, Vector3 color, bool reflective): base(color, reflective)
         {
             this.normal = normal;
             this.distance = distance;
+            this.point = new Vector3(0, distance, 0);
             
         }
     }

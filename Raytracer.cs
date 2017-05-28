@@ -57,7 +57,7 @@ namespace Template
                         }
                         if (s is Plane)
                         {
-                            distance = IntersectPlane(s as Plane, direction, cam.position, new Vector3(0, -1, 0));
+                            distance = IntersectPlane(s as Plane, direction, cam.position, (s as Plane).point);
                         }
 
 
@@ -75,16 +75,33 @@ namespace Template
 
                             Vector3 point = cam.position + ((float)distance * direction);
 
+
                             foreach (Light l in scene.lights)
                             {
+                                Vector3 shadowRay = new Vector3(point - l.position);
+                                Vector3 lightDirection = Vector3.Normalize(shadowRay);
+
                                 if (s is Sphere)
                                 {
-                                    Vector3 shadowRay = new Vector3(point - l.position);
-                                    Vector3 lightDirection = Vector3.Normalize(shadowRay);
                                     Vector3 sphereNormal = s.position - ((direction * (float)distance) + cam.position);
                                     float angle = Vector3.Dot(sphereNormal, lightDirection);
 
                                     if (ShadowIntersect(scene, s as Sphere, point, shadowRay))
+                                    {
+                                        if (angle > epsilon)
+                                        {
+                                            float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
+                                            lightSum = angle * distanceAttenuation;
+                                        }
+                                    }
+                                }
+
+                                if (s is Plane)
+                                { 
+
+                                    float angle = Vector3.Dot((s as Plane).normal, lightDirection);
+
+                                    if (ShadowIntersect(scene, s as Plane, point, shadowRay))
                                     {
                                         if (angle > epsilon)
                                         {
@@ -137,7 +154,7 @@ namespace Template
             return a;
         }
 
-        public bool ShadowIntersect(Scene scene, Sphere s, Vector3 point, Vector3 shadowRay)
+        public bool ShadowIntersect(Scene scene, Primitive s, Vector3 point, Vector3 shadowRay)
         {
             foreach (Primitive snew in scene.primitives)
             {
@@ -146,6 +163,14 @@ namespace Template
                     if (snew is Sphere)
                     {
                         if (Intersect(point, shadowRay, snew as Sphere) == 0)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (snew is Plane)
+                    {
+                        if (IntersectPlane(snew as Plane, shadowRay, point, (snew as Plane).point) == 0)
                         {
                             return false;
                         }
