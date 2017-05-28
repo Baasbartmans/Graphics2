@@ -48,6 +48,7 @@ namespace Template
                 {
                     Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
+                    Vector2 shadowPosition = new Vector2();
                     
                     float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
                     
@@ -94,12 +95,14 @@ namespace Template
                                     Vector3 sphereNormal = s.position - ((direction * (float)distance) + cam.position);
                                     float angle = Vector3.Dot(sphereNormal, lightDirection);
 
-                                    if (ShadowIntersect(scene, s as Sphere, point, shadowRay))
+                                    if (ShadowIntersect(scene, s as Sphere, point, shadowRay))//als hij niets raakt returnt shadowintersect true
                                     {
                                         if (angle > epsilon)
                                         {
                                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
                                             lightSum = angle * distanceAttenuation;
+
+                                            shadowPosition = returnScreenCoordinates(point + shadowRay);
                                         }
                                     }
                                 }
@@ -111,17 +114,7 @@ namespace Template
                             pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
-
                             
-
-
-                            //debug lines
-
-                            //if (y == 0)// % 64 == 0)
-                            //{
-                            //    screen.pixels[(int)(((int)(distance * 100) * 0.1f * -1 + 384) * screen.width) + (x + 512 + 256)] = 0xffffff;
-                            //}
-
                         }
 
                         
@@ -140,6 +133,7 @@ namespace Template
                         if (x % 64 == 0)
                         {
                             screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y,0xffff00);
                         }
 
 
