@@ -123,9 +123,9 @@ namespace Template
                             //if (lightSum > 1)
                             //    lightSum = 1;
 
-                            double red = 255 * s.color.X * lightSum//(distAtten * 0.5 + lightSum * 0.5)
-                                , green = 255 * s.color.Y * lightSum// (distAtten * 0.5 + lightSum * 0.5)
-                                , blue = 255 * s.color.Z * lightSum;//(distAtten * 0.5 + lightSum * 0.5);
+                            double red = 255 * s.color.X * (distAtten * 0.5 + lightSum * 0.5)
+                                , green = 255 * s.color.Y * (distAtten * 0.5 + lightSum * 0.5)
+                                , blue = 255 * s.color.Z * (distAtten * 0.5 + lightSum * 0.5);
                             pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
@@ -134,10 +134,16 @@ namespace Template
                             Vector2 screenCam = returnScreenCoordinates(cam.position);
 
                             //debug lines
-                            if (y == 0 && x % 64 == 0)
+                            if (y == 0)
                             {
                                 Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)distance);
-                                screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y,0xff0000);
+
+                                screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
+
+                                if (x % 64 == 0)
+                                {
+                                    screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                                }
                             }
 
                             for(int i = -2; i < 3; i++)
@@ -147,6 +153,7 @@ namespace Template
                             //{
                             //    screen.pixels[(int)(((int)(distance * 100) * 0.1f * -1 + 384) * screen.width) + (x + 512 + 256)] = 0xffffff;
                             //}
+
                         }
 
                     }
