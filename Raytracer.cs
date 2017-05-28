@@ -48,13 +48,24 @@ namespace Template
                 {
                     Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
+                    
+                    float shortestDistance = 1000;//100 should be replaced with the length limit of a ray
+
 
                     foreach (Sphere s in scene.primitives)
                     {
                         distance = Intersect(cam.position, direction, s);
 
+
+
+
                         if (distance != 0)
                         {
+                            if (distance < shortestDistance)
+                            {
+                                shortestDistance = (float)distance;
+                            }
+
                             int pixelColor;
                             if (distance == 9)
                             {
@@ -65,9 +76,7 @@ namespace Template
                             {
                                 distAtten = 1 - distance / maxDist;
                             }
-                            
-                                
-                            
+
                             //double distAtten = (DistanceAt(maxDist, (float)distance) / maxDist); // deptmap
 
                             float lightSum = 0;
@@ -89,15 +98,6 @@ namespace Template
                                         lightSum = angle * distanceAttenuation;
                                     }
                                 }
-
-                                
-
-                                
-
-                                
-
-
-
 
                             //    float distLight = Math.Abs(Intersect(point, lightDirection, s));
 
@@ -130,24 +130,10 @@ namespace Template
 
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
+                            
 
-                            Vector2 screenCam = returnScreenCoordinates(cam.position);
 
                             //debug lines
-                            if (y == 0)
-                            {
-                                Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)distance);
-
-                                screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
-
-                                if (x % 64 == 0)
-                                {
-                                    screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
-                                }
-                            }
-
-                            for(int i = -2; i < 3; i++)
-                                screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
 
                             //if (y == 0)// % 64 == 0)
                             //{
@@ -156,8 +142,29 @@ namespace Template
 
                         }
 
+                        
                     }
 
+                    Vector2 screenCam = returnScreenCoordinates(cam.position);
+
+                    if (y == 0)
+                    {
+                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
+                        if (screenPosition.X > (screen.width / 2) && screenPosition.X < screen.width && screenPosition.Y > 0 && screenPosition.Y < screen.height)
+                        {
+                            screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
+                        }
+
+                        if (x % 64 == 0)
+                        {
+                            screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                        }
+
+
+                    }
+
+                    for (int i = -2; i < 3; i++)
+                        screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
                 }
             }
 
