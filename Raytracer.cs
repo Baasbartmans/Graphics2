@@ -131,22 +131,17 @@ namespace Template
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
 
+                            Vector2 screenCam = returnScreenCoordinates(cam.position);
+
                             //debug lines
                             if (y == 0 && x % 64 == 0)
                             {
-                                for (int i = 0; i > -1000; i--)
-                                {
-                                    Vector3 position = (direction * i) + new Vector3(768,0,384) + cam.position;// + new Vector3(((int)cam.position.X * -1 + 384), 0, ((int)cam.position.Z + 512 + 256));
-                                    if((int)(position.Z) * screen.width + (int)(position.X) < screen.pixels.Length && (int)(position.Z) * screen.width + (int)(position.X) >= 0 && (direction * i).Length < distance)
-                                    screen.pixels[(int)(position.Z) * screen.width + (int)(position.X)] = 0xffffff;
-                                }  
+                                Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)distance);
+                                screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y,0xff0000);
                             }
 
-                            if (y == 0)
-                            {
-                                Vector3 position = (direction * (float)distance) + new Vector3(768, 0, 384);
-                                screen.pixels[(int)(position.Z) * screen.width + (int)(position.X)] = 0xffffff;
-                            }
+                            for(int i = -2; i < 3; i++)
+                                screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
 
                             //if (y == 0)// % 64 == 0)
                             //{
@@ -159,36 +154,11 @@ namespace Template
                 }
             }
 
-            //draw cam
-            screen.pixels[((int)cam.position.X * -1 + 384) * screen.width + ((int)cam.position.Z + 512 + 256)] = 0xffffff;
-            screen.pixels[((int)cam.position.X * -1 + 384) * screen.width + ((int)cam.position.Z + 512 + 256 + 1)] = 0xffffff;
-            screen.pixels[((int)cam.position.X * -1 + 384 + 1) * screen.width + ((int)cam.position.Z + 512 + 256)] = 0xffffff;
-            screen.pixels[((int)cam.position.X * -1 + 384 + 1) * screen.width + ((int)cam.position.Z + 512 + 256 + 1)] = 0xffffff;
-
-            //draw screen
-            for (int i = -5; i < 5; i++)
-            {
-                screen.pixels[((int)cam.position.X * -1 - (int)cam.fov + 384) * screen.width + ((int)cam.position.Z + 512 + 256 + i)] = 0xffffff;
-            }
-
-
-
-
-            //Variables that are supposed to come from the actual camera and other classes:
-            int xWorldSize = 10;
-            int yWorldSize = 10;
-            int zWorldSize = 10;
-            int cameraX = 0;
-            int cameraY = 0;
-            int cameraZ = 3;
-
-
             //Debugging view:
             screen.Print("Ray Tracer", 2, 2, 0xffffff);
             screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
-            screen.pixels[screen.width / 2 + ((cameraX / xWorldSize) * (screen.width / 2)) /*x <-- and z -->*/ + (cameraZ / zWorldSize) * (screen.width * screen.width)] = 0x00ff00;
         }
 
         //public float DistanceAt(float max, float current)
@@ -315,6 +285,24 @@ namespace Template
                 if (first < second) return first;
                 else return second;
             }
+        }
+
+        static public int xHalfWorldSize = 5;
+        public static int xWorldSize = xHalfWorldSize * 2;
+        public int xMultiplier = 512 / xWorldSize;
+        static public int zHalfWorldSize = 35;
+        public static int zWorldSize = zHalfWorldSize * 2;
+        public int zMultiplier = 512 / zWorldSize;
+
+        public Vector2 returnScreenCoordinates(Vector3 oldCoords)
+        {
+            Vector2 coords = new Vector2(oldCoords.X,oldCoords.Z);
+            coords.X += xHalfWorldSize;
+            coords.X *= xMultiplier;
+            coords.X += 512;
+            coords.Y -= zHalfWorldSize;
+            coords.Y *= -zMultiplier;     
+            return coords;
         }
 
         public int TX(float x)
