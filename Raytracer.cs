@@ -104,7 +104,7 @@ namespace Template
                                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
                                             lightSum = angle * distanceAttenuation;
 
-                                            shadowPosition = returnScreenCoordinates(point + shadowRay);
+                                            shadowPosition = returnScreenCoordinates(point - shadowRay);
                                         }
                                     }
                                 }
