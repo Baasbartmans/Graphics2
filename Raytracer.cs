@@ -15,7 +15,7 @@ namespace Template
         public Camera cam;
         public Surface displaySurf;
 
-        int maxDist = 1 / 30;
+        int maxDist = 1 / 5;
 
         public float div = (1f / 256f);
 
@@ -62,7 +62,7 @@ namespace Template
 
         int AugustRay(int x, int y, int limit)
         {
-            Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenZ);//the point on the screen you're tracing towards
+            Vector3 screenpoint = (x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction;//the point on the screen you're tracing towards
             Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
             Vector2 screenCam = returnScreenCoordinates(cam.position);
             int pixelColor = 0;
@@ -76,17 +76,13 @@ namespace Template
 
             if (distance != 0 && currentPrim != null)
             {
-                if (currentPrim is Sphere)
-                {
-                    int g = 0;
-                }
 
                 if (distance < shortestDistance)
                 {
-                    shortestDistance = (float)distance;
+                    shortestDistance = distance;
                 }
 
-                double distAtten = 0;
+                float distAtten = 0;
 
                 if (distance * maxDist <= 1)
                 {
@@ -95,7 +91,7 @@ namespace Template
 
                 float lightSum = 0;
 
-                Vector3 point = ((float)distance * direction) - cam.position;
+                Vector3 point = (distance * direction) - cam.position;
 
                 //light and shadows
                 foreach (Light l in scene.lights)
@@ -106,7 +102,7 @@ namespace Template
 
                     if (currentPrim is Sphere)
                     {
-                        Vector3 sphereNormal = currentPrim.position - ((direction * (float)distance) + cam.position);
+                        Vector3 sphereNormal = currentPrim.position - ((direction * distance) + cam.position);
                         float angle = Vector3.Dot(sphereNormal, lightDirection);
 
                         if (ShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
@@ -139,7 +135,7 @@ namespace Template
                     if (y == 0)
                     {
 
-                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
+                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
 
                         if (x % 64 == 0)
                         {
@@ -211,7 +207,10 @@ namespace Template
 
             Vector2 screenFirst = returnScreenCoordinates(cam.screen[0]);
             Vector2 screenSecond = returnScreenCoordinates(cam.screen[1]);
-            screen.Line((int)screenFirst.X, (int)screenFirst.Y, (int)screenSecond.X, (int)screenSecond.Y, 0xffffff);
+            //Vector2 screenThird = returnScreenCoordinates(cam.screen[2]);
+            //Vector2 screenFourth = returnScreenCoordinates(cam.screen[3]);
+
+            screen.Line((int)screenFirst.X, (int)screenFirst.Y, (int)screenSecond.X, (int)screenSecond.Y, 0xffffff);//deze moet iets anders tekenen op het moment dat je omhoog kijkt ....
         }
 
 

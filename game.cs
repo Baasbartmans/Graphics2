@@ -66,13 +66,43 @@ namespace Template {
 
             if (keyState.IsKeyDown(Key.Left))
             {
-                cam.position.X -= 0.1f;
+                cam.xRotation -= 8;
+                if (cam.xRotation < 0)
+                    cam.xRotation = 359;
                 cam.updateScreen();
             }
             if (keyState.IsKeyDown(Key.Right))
             {
-                cam.position.X += 0.1f;
+                cam.xRotation += 8;
+                if (cam.xRotation > 359)
+                    cam.xRotation = 0;
                 cam.updateScreen();
+            }
+            if (keyState.IsKeyDown(Key.Up))
+            {
+                cam.yRotation -= 8;
+                if (cam.yRotation < 0)
+                    cam.yRotation = 359;
+                cam.updateScreen();
+            }
+            if (keyState.IsKeyDown(Key.Down))
+            {
+                cam.yRotation += 8;
+                if (cam.yRotation > 359)
+                    cam.yRotation = 0;
+                cam.updateScreen();
+            }
+            if (keyState.IsKeyDown(Key.Space))
+            {
+                Console.WriteLine("Direction: " + cam.direction);
+                Console.WriteLine("Screen vars: " + cam.screen[0]);
+                Console.WriteLine(cam.screen[1]);
+                Console.WriteLine(cam.screen[2]);
+                Console.WriteLine(cam.screen[3]);
+            }
+            if (keyState.IsKeyDown(Key.R))
+            {
+                Console.WriteLine(cam.right);
             }
         }
     }
