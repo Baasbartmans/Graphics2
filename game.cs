@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using template;
+using OpenTK.Input;
 
 namespace Template {
 
@@ -42,11 +43,24 @@ namespace Template {
             raytracer = new Raytracer(cam, scene, displaySurf);
             raytracer.screen = screen;
         }
-	    // tick: renders one frame
-	    public void Tick()
-	    {
-            raytracer.Tick();		    
-	    }
+        // tick: renders one frame
+        public void Tick()
+        {
+            raytracer.Tick();
+
+            KeyboardState keyState = Keyboard.GetState();
+
+            if (keyState.IsKeyDown(Key.Left))
+            {
+                cam.position.X -= 0.1f;
+                cam.updateScreen();
+            }
+            if (keyState.IsKeyDown(Key.Right))
+            {
+                cam.position.X += 0.1f;
+                cam.updateScreen();
+            }
+        }
     }
 
 } // namespace Template
