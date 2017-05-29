@@ -21,12 +21,25 @@ namespace Template
 
         const float epsilon = 0.001f;
 
+        float[] cosTable = new float[100];
+        float[] sinTable = new float[100];
+
+        const int circleAccuracy = 12;
+
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
 
             this.cam = cam;
             this.scene = scene;
             this.displaySurf = displaySurf;
+
+            const float oneOverCircleAccuracy = 1 / circleAccuracy;
+            const float tableMultiplier = (float)Math.PI * 2 / (circleAccuracy - 1);
+            for (int i = 0; i < circleAccuracy; i++)
+            {
+                cosTable[i] = (float)Math.Cos(i * tableMultiplier - oneOverCircleAccuracy);
+                sinTable[i] = (float)Math.Sin(i * tableMultiplier - oneOverCircleAccuracy);
+            }
 
         }
 
@@ -46,12 +59,27 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
+                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenDistance);//the point on the screen you're tracing towards
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
                     Vector2 shadowPosition = new Vector2();
-                    
+
                     float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
-                    
+
+                    foreach(Primitive s in scene.primitives)
+                    {
+                        if (s is Sphere)
+                        {
+                            Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
+
+
+                            //Console.WriteLine("Test" + (s as Sphere).radius);
+                            drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
+                            //Console.WriteLine((s as Sphere).radius);
+                            //Console.WriteLine(sphereScreenPosition.X + " EN " + sphereScreenPosition.Y);
+                            //drawCircle(new Vector2(500, 200), 30f);
+                        }
+                    }
+
                     foreach (Primitive s in scene.primitives)
                     {
                         if (s is Sphere)
@@ -77,9 +105,9 @@ namespace Template
                             {
                                 distAtten = 1 - distance / maxDist;
                             }
-                            
-                                
-                            
+
+
+
                             //double distAtten = (DistanceAt(maxDist, (float)distance) / maxDist); // deptmap
 
                             float lightSum = 0;
@@ -110,7 +138,7 @@ namespace Template
                                 }
 
                                 if (s is Plane)
-                                { 
+                                {
 
                                     float angle = Vector3.Dot((s as Plane).normal, lightDirection);
 
@@ -131,10 +159,12 @@ namespace Template
                             pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
                             screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
-                            
+
                         }
 
-                        
+
+
+
                     }
 
                     Vector2 screenCam = returnScreenCoordinates(cam.position);
@@ -144,13 +174,13 @@ namespace Template
                         Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
                         if (screenPosition.X > (screen.width / 2) && screenPosition.X < screen.width && screenPosition.Y > 0 && screenPosition.Y < screen.height)
                         {
-                            screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
+                            //screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
                         }
 
                         if (x % 64 == 0)
                         {
                             screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
-                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y,0xffff00);
+                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y, 0xffff00);
                         }
 
 
@@ -166,6 +196,19 @@ namespace Template
             screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
+
+
+        }
+
+
+
+        public void drawCircle(Vector2 position, float radius)
+        {
+            for (int i = 0; i < circleAccuracy - 1; i ++)
+            {
+                screen.Line((int)(radius * cosTable[i] + position.X), (int)(radius * sinTable[i] + position.Y),(int)(radius * cosTable[i + 1] + position.X), (int)(radius * sinTable[i + 1] + position.Y), 0xffffff);
+            }
+
         }
 
         public float Clamp(float a, int min, int max)
@@ -269,7 +312,7 @@ namespace Template
         static public int xHalfWorldSize = 5;
         public static int xWorldSize = xHalfWorldSize * 2;
         public int xMultiplier = 512 / xWorldSize;
-        static public int zHalfWorldSize = 35;
+        static public int zHalfWorldSize = 5;
         public static int zWorldSize = zHalfWorldSize * 2;
         public int zMultiplier = 512 / zWorldSize;
 
@@ -277,9 +320,10 @@ namespace Template
         {
             Vector2 coords = new Vector2(oldCoords.X, oldCoords.Z);
             coords.X += xHalfWorldSize;
+            coords.Y -= zHalfWorldSize;
+
             coords.X *= xMultiplier;
             coords.X += 512;
-            coords.Y -= zHalfWorldSize;
             coords.Y *= -zMultiplier;
             return coords;
         }
