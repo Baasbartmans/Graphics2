@@ -66,6 +66,8 @@ namespace Template
             Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
             Vector2 screenCam = returnScreenCoordinates(cam.position);
             int pixelColor = 0;
+            float distAtten = 0;
+            float lightSum = 0;
 
             float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
@@ -82,14 +84,12 @@ namespace Template
                     shortestDistance = distance;
                 }
 
-                float distAtten = 0;
 
                 if (distance * maxDist <= 1)
                 {
                     distAtten = 1 - distance * maxDist;
                 }
 
-                float lightSum = 0;
 
                 Vector3 point = (distance * direction) - cam.position;
 
@@ -105,7 +105,7 @@ namespace Template
                         Vector3 sphereNormal = currentPrim.position - ((direction * distance) + cam.position);
                         float angle = Vector3.Dot(sphereNormal, lightDirection);
 
-                        if (ShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
+                        if (NoShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
                         {
                             if (angle > epsilon)
                             {
@@ -146,9 +146,6 @@ namespace Template
                     , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
                     , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
                 pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
-
-
-                    }
                     //}
 
 
@@ -218,8 +215,6 @@ namespace Template
 
         float LightSumCalc(Light l, Vector3 direction, float distance, float angle, Primitive prim)
         {
-            float lightSum = 0;
-
             foreach (Primitive p in scene.primitives)
             {
                 if (p is Sphere && p != prim)
@@ -238,12 +233,12 @@ namespace Template
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / ((lightPoint - intersectPoint).Length * (lightPoint - intersectPoint).Length));
-                            lightSum =  angle * distanceAttenuation;
+                            return angle * distanceAttenuation;
                         }
                     }
                 }
             }
-            return lightSum;
+            return 0;
         }
 
         public void ClosestPrim(Vector3 direction, out Primitive currentPrim, out float distance)
@@ -438,4 +433,6 @@ namespace Template
             return coords;
         }
     }
+
+
 }
