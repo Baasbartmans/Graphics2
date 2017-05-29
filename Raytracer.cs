@@ -21,10 +21,11 @@ namespace Template
 
         const float epsilon = 0.001f;
 
-        float[] cosTable = new float[100];
-        float[] sinTable = new float[100];
+        const int circleAccuracy = 110;
 
-        const int circleAccuracy = 12;
+        float[] cosTable = new float[circleAccuracy];
+        float[] sinTable = new float[circleAccuracy];
+
 
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
@@ -65,26 +66,15 @@ namespace Template
 
                     float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
-                    foreach(Primitive s in scene.primitives)
-                    {
-                        if (s is Sphere)
-                        {
-                            Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
-
-
-                            //Console.WriteLine("Test" + (s as Sphere).radius);
-                            drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
-                            //Console.WriteLine((s as Sphere).radius);
-                            //Console.WriteLine(sphereScreenPosition.X + " EN " + sphereScreenPosition.Y);
-                            //drawCircle(new Vector2(500, 200), 30f);
-                        }
-                    }
-
                     foreach (Primitive s in scene.primitives)
                     {
                         if (s is Sphere)
                         {
                             distance = Intersect(cam.position, direction, s as Sphere);
+
+                            //DEBUG:
+                            Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
+                            drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
                         }
                         if (s is Plane)
                         {
@@ -197,6 +187,15 @@ namespace Template
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
 
+
+            foreach (Primitive s in scene.primitives)
+            {
+                if (s is Sphere)
+                {
+                    Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
+                    drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
+                }
+            }
 
         }
 
