@@ -15,6 +15,9 @@ namespace template
         public float fov;
         public float screenDistance;
         public float screenZ;
+        public int xRotation;
+        public int yRotation;
+        public int zRotation;
 
         public Camera()
         {
@@ -27,9 +30,19 @@ namespace template
 
             screenZ = position.Z + screenDistance;
 
+            xRotation = 0;
+            yRotation = 0;
+
             direction = new Vector3(0, 0, 1);
             //scherm moet misschien ook nog kunnen draaien? Dat weet ik niet zeker
-            screen = new Vector3[4] {
+
+            updateScreen();
+            
+        }
+
+        public void updateScreen()
+        {
+                screen = new Vector3[4] {
                 new Vector3(position.X - 1, position.Y + 1, screenZ),
                 new Vector3(position.X + 1, position.Y + 1, screenZ),
                 new Vector3(position.X + 1, position.Y - 1, screenZ),
