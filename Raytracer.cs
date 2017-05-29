@@ -314,6 +314,7 @@ namespace Template
             Vector3 difference = lineOrigin - sphere.position;
 
             float a = Vector3.Dot(direction, difference);
+
             float discriminant = (a * a - (difference).LengthSquared + (sphere.radiusSquared));
 
             if (discriminant >= 0)
@@ -342,14 +343,9 @@ namespace Template
 
         public float IntersectPlane(Plane p, Vector3 line, Vector3 origin, Vector3 point)
         {
-            //check of ze parallel zijn
-            if (Vector3.Dot(p.normal, line) != 0)
-            {
-                float distance = Vector3.Dot((point - origin), p.normal) / Vector3.Dot(line, p.normal);
-                if (distance > 0)
-                    return distance;
-            }
-
+            float distance = Vector3.Dot((point - origin), p.normal) / Vector3.Dot(p.normal, line) + epsilon;
+            if (distance > 0)
+                return distance;
             return 0;
         }
 
@@ -405,16 +401,5 @@ namespace Template
             coords.Y *= -zMultiplier;
             return coords;
         }
-
-        public int TX(float x)
-        {
-            return (int)x;
-        }
-
-        public int TZ(float z)
-        {
-            return (int)z;
-        }
-
     }
 }
