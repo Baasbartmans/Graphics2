@@ -15,7 +15,7 @@ namespace Template
         public Camera cam;
         public Surface displaySurf;
 
-        int maxDist = 1 / 5;
+        float maxDist = 1 / 5;
 
         public float div = (1f / 256f);
 
@@ -60,9 +60,8 @@ namespace Template
 
 
 
-        int AugustRay(Vector3 screenpoint, int limit)
+        int AugustRay(int x, int y, Vector3 screenpoint, int limit)
         {
-            
             Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
             Vector2 screenCam = returnScreenCoordinates(cam.position);
             int pixelColor = 0;
@@ -134,13 +133,15 @@ namespace Template
 
                 if (y == 0)
                 {
-
-                    Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                    if (x %64 == 0)
+                    {
+                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                        screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                    }
 
                 }
 
             }
-
 
             double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
                 , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
@@ -164,7 +165,7 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay((x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y,(x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
                 }//for loop y
             }//(for loop x)
 

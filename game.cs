@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using template;
+using OpenTK.Input;
 
 namespace Template {
 
@@ -59,8 +60,39 @@ namespace Template {
 	    // tick: renders one frame
 	    public void Tick()
 	    {
-            raytracer.Tick();		    
-	    }
+            raytracer.Tick();
+
+            KeyboardState keystate = Keyboard.GetState();
+
+            if (keystate.IsKeyDown(Key.Left))
+            {
+                cam.xRotation -= 8;
+                if (cam.xRotation < 0)
+                    cam.xRotation += 360;
+                cam.updateScreen();
+            }
+            if (keystate.IsKeyDown(Key.Right))
+            {
+                cam.xRotation += 8;
+                if (cam.xRotation > 359)
+                    cam.xRotation -= 360;
+                cam.updateScreen();
+            }
+            if (keystate.IsKeyDown(Key.Up))
+            {
+                cam.yRotation -= 8;
+                if (cam.yRotation < 0)
+                    cam.yRotation += 360;
+                cam.updateScreen();
+            }
+            if (keystate.IsKeyDown(Key.Down))
+            {
+                cam.yRotation += 8;
+                if (cam.yRotation > 359)
+                    cam.yRotation -= 360;
+                cam.updateScreen();
+            }
+        }
     }
 
 } // namespace Template
