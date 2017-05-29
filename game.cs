@@ -25,8 +25,8 @@ namespace Template {
             Light light = new Light(new Vector3(-15f, -3, 0));
             scene.lights.Add(light);
 
-         //   Light light2 = new Light(new Vector3(0, -1, 30));
-         //   scene.lights.Add(light2);
+            Light light2 = new Light(new Vector3(0, -1, 30));
+            scene.lights.Add(light2);
 
             Plane plane1 = new Plane(1, new Vector3(0, 1, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane1);

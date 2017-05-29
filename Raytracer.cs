@@ -86,7 +86,7 @@ namespace Template
 
                 if (distance * maxDist <= 1)
                 {
-                    distAtten = 1 - distance * maxDist;
+                    distAtten = 1 - (distance * maxDist);
                 }
 
 
@@ -103,32 +103,26 @@ namespace Template
                     {
                         Vector3 sphereNormal = currentPrim.position - ((direction * distance) + cam.position);
                         float angle = Vector3.Dot(sphereNormal, lightDirection);
-
-                        //if (NoShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
+                        if (angle > epsilon)
                         {
-                            if (angle > epsilon)
-                            {
-                                float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
-                                lightSum = angle * distanceAttenuation;
+                            float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
+                            lightSum = angle * distanceAttenuation;
 
-                            }
                         }
                     }
-
-
-                    //if (currentPrim is Sphere)
-                    //{
-                    //    Vector3 sphereNormal = currentPrim.position - ((direction * (float)distance) + cam.position);
-                    //    float angle = Vector3.Dot(sphereNormal, lightDirection);
-                    //    lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
-                    //}
 
                     //checkt voor plane hoe de schaduwen vallen
                     if (currentPrim is Plane)
                     {
                         float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
-                        lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
+                        lightSum += LightSumCalc(l, direction, distance, angle, currentPrim);
                     }
+                }
+                
+
+                if (lightSum > 1)
+                {
+                    lightSum = 1;
                 }
 
                 if (y == 0)
@@ -141,13 +135,11 @@ namespace Template
 
                 }
 
+                double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
+                    , green = 255 * currentPrim.color.Y *(distAtten * 0.5 + lightSum * 0.5)
+                    , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
+                pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
             }
-
-            double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
-                , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
-                , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
-            pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
-            //}
 
 
 
@@ -239,12 +231,12 @@ namespace Template
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / ((lightPoint - intersectPoint).Length * (lightPoint - intersectPoint).Length));
-                            lightSum =  angle * distanceAttenuation;
+                            lightSum = angle * distanceAttenuation;
                         }
                     }
                 }
             }
-            return lightSum ;
+            return lightSum;
         }
 
         public void ClosestPrim(Vector3 direction, out Primitive currentPrim, out float distance)
