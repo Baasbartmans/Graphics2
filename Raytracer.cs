@@ -60,9 +60,9 @@ namespace Template
 
 
 
-        int AugustRay(int x, int y, int limit)
+        int AugustRay(Vector3 screenpoint, int limit)
         {
-            Vector3 screenpoint = (x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction;//the point on the screen you're tracing towards
+            
             Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
             Vector2 screenCam = returnScreenCoordinates(cam.position);
             int pixelColor = 0;
@@ -162,7 +162,7 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y, 4);
+                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay((x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
                 }//for loop y
             }//(for loop x)
 
