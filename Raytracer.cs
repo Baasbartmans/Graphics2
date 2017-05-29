@@ -21,12 +21,32 @@ namespace Template
 
         const float epsilon = 0.001f;
 
+        const int circleAccuracy = 110;
+
+        float[] cosTable = new float[circleAccuracy];
+        float[] sinTable = new float[circleAccuracy];
+
+        public int[] pixelBuffer;
+        
+        Vector2 shadowPosition = new Vector2();//2dimensional vector that shows where to draw the shadow ray towards
+
+
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
 
             this.cam = cam;
             this.scene = scene;
             this.displaySurf = displaySurf;
+
+            pixelBuffer = new int[1024 * 512];
+
+            const float oneOverCircleAccuracy = 1 / circleAccuracy;
+            const float tableMultiplier = (float)Math.PI * 2 / (circleAccuracy - 1);
+            for (int i = 0; i < circleAccuracy; i++)
+            {
+                cosTable[i] = (float)Math.Cos(i * tableMultiplier - oneOverCircleAccuracy);
+                sinTable[i] = (float)Math.Sin(i * tableMultiplier - oneOverCircleAccuracy);
+            }
 
         }
 
@@ -37,6 +57,11 @@ namespace Template
             Render(cam, scene, displaySurf);
         }
 
+
+
+
+
+
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
             int maxDist = 30;
@@ -45,11 +70,8 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-
-
-                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.fov);
+                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenZ);//the point on the screen you're tracing towards
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
-                    Vector2 shadowPosition = new Vector2();
 
                     float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
@@ -129,8 +151,9 @@ namespace Template
                             , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
                         pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
-                        screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
+                            pixelBuffer[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
+                        }
                     }
 
                     Vector2 screenCam = returnScreenCoordinates(cam.position);
@@ -138,15 +161,11 @@ namespace Template
                     if (y == 0)
                     {
                         Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
-                        if (screenPosition.X > (screen.width / 2) && screenPosition.X < screen.width && screenPosition.Y > 0 && screenPosition.Y < screen.height)
-                        {
-                            screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
-                        }
-
+                        
                         if (x % 64 == 0)
                         {
                             screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
-                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y,0xffff00);
+                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y, 0xffff00);
                         }
 
 
@@ -154,7 +173,31 @@ namespace Template
 
                     for (int i = -2; i < 3; i++)
                         screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
+                }//for loop y
+            }//(for loop x)
+
+           
+
+
+            foreach (Primitive s in scene.primitives)
+            {
+                if (s is Sphere)
+                {
+                    Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
+
+                    double red = 255 * s.color.X
+                                , green = 255 * s.color.Y
+                                , blue = 255 * s.color.Z;
+                    int pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
+                    
+                    drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier, pixelColor);
                 }
+            }
+
+
+            for(int u = 0; u < screen.width * screen.height; u++) {
+                if(u % 1024 < 512)
+                    screen.pixels[u] = pixelBuffer[u];
             }
 
             //Debugging view:
@@ -162,6 +205,20 @@ namespace Template
             screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
+            Vector2 screenFirst = returnScreenCoordinates(cam.screen[0]);
+            Vector2 screenSecond = returnScreenCoordinates(cam.screen[1]);
+            screen.Line((int)screenFirst.X, (int)screenFirst.Y, (int)screenSecond.X, (int)screenSecond.Y, 0xffffff);
+        }
+
+
+
+        public void drawCircle(Vector2 position, float radius, int color)
+        {
+            for (int i = 0; i < circleAccuracy - 1; i ++)
+            {
+                screen.Line((int)(radius * cosTable[i] + position.X), (int)(radius * sinTable[i] + position.Y),(int)(radius * cosTable[i + 1] + position.X), (int)(radius * sinTable[i + 1] + position.Y), color);
+            }
+
         }
 
         public void ClosestPrim(Vector3 direction, out Primitive currentPrim, out float distance)
@@ -336,7 +393,7 @@ namespace Template
         static public int xHalfWorldSize = 5;
         public static int xWorldSize = xHalfWorldSize * 2;
         public int xMultiplier = 512 / xWorldSize;
-        static public int zHalfWorldSize = 35;
+        static public int zHalfWorldSize = 5;
         public static int zWorldSize = zHalfWorldSize * 2;
         public int zMultiplier = 512 / zWorldSize;
 
@@ -344,9 +401,10 @@ namespace Template
         {
             Vector2 coords = new Vector2(oldCoords.X, oldCoords.Z);
             coords.X += xHalfWorldSize;
+            coords.Y -= zHalfWorldSize;
+
             coords.X *= xMultiplier;
             coords.X += 512;
-            coords.Y -= zHalfWorldSize;
             coords.Y *= -zMultiplier;
             return coords;
         }

@@ -13,13 +13,28 @@ namespace template
         public Vector3 direction;
         public Vector3[] screen;
         public float fov;
+        public float screenDistance;
+        public float screenZ;
 
         public Camera()
         {
             fov = 10;
-            position = new Vector3(0,0,0);
+            screenDistance = 1 / fov;//dit moet verplicht aangepast worden, fov moet werken enzo
+
+            screenDistance = 2;
+
+            position = new Vector3(0,0,-4);
+
+            screenZ = position.Z + screenDistance;
+
             direction = new Vector3(0, 0, 1);
-            //screen = new Vector3[4] {new Vector3(-1,1,distance), new Vector3(1,1,distance), new Vector3(1,-1,distance), new Vector3(-1,-1,distance) };
+            //scherm moet misschien ook nog kunnen draaien? Dat weet ik niet zeker
+            screen = new Vector3[4] {
+                new Vector3(position.X - 1, position.Y + 1, screenZ),
+                new Vector3(position.X + 1, position.Y + 1, screenZ),
+                new Vector3(position.X + 1, position.Y - 1, screenZ),
+                new Vector3(position.X - 1, position.Y - 1, screenZ)
+            };
         }
     }
 }
