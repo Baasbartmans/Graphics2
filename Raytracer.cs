@@ -157,10 +157,6 @@ namespace Template
                             pixelBuffer[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
                         }
-
-
-
-
                     }
 
                     Vector2 screenCam = returnScreenCoordinates(cam.position);
@@ -168,11 +164,7 @@ namespace Template
                     if (y == 0)
                     {
                         Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
-                        if (screenPosition.X > (screen.width / 2) && screenPosition.X < screen.width && screenPosition.Y > 0 && screenPosition.Y < screen.height)
-                        {
-                            //screen.pixels[(int)screenPosition.X + (int)screenPosition.Y * screen.width] = 0xffffff;
-                        }
-
+                        
                         if (x % 64 == 0)
                         {
                             screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
@@ -184,8 +176,8 @@ namespace Template
 
                     for (int i = -2; i < 3; i++)
                         screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
-                }
-            }
+                }//for loop y
+            }//(for loop x)
 
            
 
@@ -216,7 +208,9 @@ namespace Template
             screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
-
+            Vector2 screenFirst = returnScreenCoordinates(cam.screen[0]);
+            Vector2 screenSecond = returnScreenCoordinates(cam.screen[1]);
+            screen.Line((int)screenFirst.X, (int)screenFirst.Y, (int)screenSecond.X, (int)screenSecond.Y, 0xffffff);
         }
 
 
