@@ -59,7 +59,7 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenDistance);//the point on the screen you're tracing towards
+                    Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenZ);//the point on the screen you're tracing towards
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
                     Vector2 shadowPosition = new Vector2();
 
