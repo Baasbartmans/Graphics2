@@ -22,31 +22,34 @@ namespace Template {
             scene = new Scene();
             displaySurf = new Surface(0,0);
 
-            Light light = new Light(new Vector3(-15f, -3, 0));
+            Light light = new Light(new Vector3(-10f, -1, -5));
             scene.lights.Add(light);
 
-            Light light2 = new Light(new Vector3(0, -1, 30));
-            scene.lights.Add(light2);
+            //Light light2 = new Light(new Vector3(7, -3, -10));
+            //scene.lights.Add(light2);
 
+            //bot
             Plane plane1 = new Plane(1, new Vector3(0, 1, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane1);
 
-            Plane plane2 = new Plane(3, new Vector3(-1, 0, 0), new Vector3(1, 1, 1), false);
+            ////side
+            Plane plane2 = new Plane(10, new Vector3(-1, 0, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane2);
 
-            Plane plane3 = new Plane(3, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
+            //rechts
+            Plane plane3 = new Plane(3.5f, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane3);
 
             Plane plane4 = new Plane(50, new Vector3(0, 0, 1), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane4);
 
-            Sphere sphere2 = new Sphere(new Vector3(0, 0, 1), 1, new Vector3(1, 1, 0.5f), false);
+            Sphere sphere2 = new Sphere(new Vector3(0, 0, 2), 1, new Vector3(1, 1, 0.5f), false);
             scene.primitives.Add(sphere2);
 
-            Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 5), 1, new Vector3(0.5f, 1, 1), true);
+            Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, 4), 1, new Vector3(0.5f, 1, 1), true);
             scene.primitives.Add(sphere1);
 
-            Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 5), 1, new Vector3(1, 0.5f, 1), true);
+            Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, 4), 1, new Vector3(1, 0.5f, 1), true);
             scene.primitives.Add(sphere3);
 
 
