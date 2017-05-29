@@ -20,7 +20,7 @@ namespace Template
         public float div = (1f / 256f);
 
         const float epsilon = 0.001f;
-         
+
         const int circleAccuracy = 110;
 
         float[] cosTable = new float[circleAccuracy];
@@ -105,7 +105,7 @@ namespace Template
                         Vector3 sphereNormal = currentPrim.position - ((direction * distance) + cam.position);
                         float angle = Vector3.Dot(sphereNormal, lightDirection);
 
-                        if (NoShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
+                        //if (NoShadowIntersect(scene, currentPrim as Sphere, point, shadowRay, l))//als hij niets raakt returnt shadowintersect true
                         {
                             if (angle > epsilon)
                             {
@@ -117,43 +117,45 @@ namespace Template
                     }
 
 
-                            //if (currentPrim is Sphere)
-                            //{
-                            //    Vector3 sphereNormal = currentPrim.position - ((direction * (float)distance) + cam.position);
-                            //    float angle = Vector3.Dot(sphereNormal, lightDirection);
-                            //    lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
-                            //}
+                    //if (currentPrim is Sphere)
+                    //{
+                    //    Vector3 sphereNormal = currentPrim.position - ((direction * (float)distance) + cam.position);
+                    //    float angle = Vector3.Dot(sphereNormal, lightDirection);
+                    //    lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
+                    //}
 
-                            //checkt voor plane hoe de schaduwen vallen
-                            if (currentPrim is Plane)
-                            {
-                                float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
-                                lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
-                            }
-                        }
-
-                    if (y == 0)
+                    //checkt voor plane hoe de schaduwen vallen
+                    if (currentPrim is Plane)
                     {
-
-                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
-
+                        float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
+                        lightSum = LightSumCalc(l, direction, distance, angle, currentPrim);
                     }
+                }
+
+                if (y == 0)
+                {
+
+                    Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
 
                 }
 
+            }
 
-                double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
-                    , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
-                    , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
-                pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
-                    //}
+
+            double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
+                , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
+                , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
+            pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
+            //}
 
 
 
             for (int i = -2; i < 3; i++)
+            {
                 screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
+            }
 
-                return pixelColor;
+            return pixelColor;
         }
 
         public void Render(Camera cam, Scene scene, Surface displaySurf)
@@ -183,9 +185,10 @@ namespace Template
                     drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier, pixelColor);
                 }
             }
-            
-            for(int u = 0; u < screen.width * screen.height; u++) {
-                if(u % 1024 < 512)
+
+            for (int u = 0; u < screen.width * screen.height; u++)
+            {
+                if (u % 1024 < 512)
                     screen.pixels[u] = pixelBuffer[u];
             }
 
@@ -215,6 +218,8 @@ namespace Template
 
         float LightSumCalc(Light l, Vector3 direction, float distance, float angle, Primitive prim)
         {
+            float lightSum = 0;
+
             foreach (Primitive p in scene.primitives)
             {
                 if (p is Sphere && p != prim)
@@ -226,19 +231,19 @@ namespace Template
                     float check2 = Intersect(intersectPoint, lineDirection, p as Sphere);
                     if (check2 != 0)
                     {
-                        return  0;
+                        return 0;
                     }
                     else
                     {
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / ((lightPoint - intersectPoint).Length * (lightPoint - intersectPoint).Length));
-                            return angle * distanceAttenuation;
+                            lightSum =  angle * distanceAttenuation;
                         }
                     }
                 }
             }
-            return 0;
+            return lightSum ;
         }
 
         public void ClosestPrim(Vector3 direction, out Primitive currentPrim, out float distance)
