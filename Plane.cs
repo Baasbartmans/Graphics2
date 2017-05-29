@@ -17,7 +17,7 @@ namespace template
         {
             this.normal = normal;
             this.distance = distance;
-            this.point = new Vector3(0, distance, 0);
+            point = distance * normal;
             
         }
     }
