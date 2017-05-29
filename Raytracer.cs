@@ -15,7 +15,7 @@ namespace Template
         public Camera cam;
         public Surface displaySurf;
 
-        float maxDist = 1 / 5;
+        float maxDist = 1 / 5f;
 
         public float div = (1f / 256f);
 
