@@ -21,7 +21,7 @@ namespace Template {
             scene = new Scene();
             displaySurf = new Surface(0,0);
 
-            Light light = new Light(new Vector3(-5f, -3, 15));
+            Light light = new Light(new Vector3(-15f, -3, 0));
             scene.lights.Add(light);
 
             Plane plane1 = new Plane(1, new Vector3(0, 1, 0), new Vector3(1, 1, 1), false);

@@ -26,6 +26,10 @@ namespace Template
         float[] cosTable = new float[circleAccuracy];
         float[] sinTable = new float[circleAccuracy];
 
+        public int[] pixelBuffer;
+        
+        Vector2 shadowPosition = new Vector2();//2dimensional vector that shows where to draw the shadow ray towards
+
 
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
@@ -33,6 +37,8 @@ namespace Template
             this.cam = cam;
             this.scene = scene;
             this.displaySurf = displaySurf;
+
+            pixelBuffer = new int[1024 * 512];
 
             const float oneOverCircleAccuracy = 1 / circleAccuracy;
             const float tableMultiplier = (float)Math.PI * 2 / (circleAccuracy - 1);
@@ -51,6 +57,11 @@ namespace Template
             Render(cam, scene, displaySurf);
         }
 
+
+
+
+
+
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
             double distance = 0;
@@ -62,7 +73,6 @@ namespace Template
                 {
                     Vector3 screenpoint = new Vector3(x / 256f, y / 256f, cam.screenZ);//the point on the screen you're tracing towards
                     Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
-                    Vector2 shadowPosition = new Vector2();
 
                     float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
@@ -71,10 +81,6 @@ namespace Template
                         if (s is Sphere)
                         {
                             distance = Intersect(cam.position, direction, s as Sphere);
-
-                            //DEBUG:
-                            Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
-                            drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
                         }
                         if (s is Plane)
                         {
@@ -148,7 +154,7 @@ namespace Template
                                 , blue = 255 * s.color.Z * (distAtten * 0.5 + lightSum * 0.5);
                             pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
-                            screen.pixels[(y + 256) * screen.width + (x + 256)] = pixelColor;
+                            pixelBuffer[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
                         }
 
@@ -181,11 +187,7 @@ namespace Template
                 }
             }
 
-            //Debugging view:
-            screen.Print("Ray Tracer", 2, 2, 0xffffff);
-            screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
-            for (int i = 0; i < screen.height; i++)
-                screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
+           
 
 
             foreach (Primitive s in scene.primitives)
@@ -193,19 +195,37 @@ namespace Template
                 if (s is Sphere)
                 {
                     Vector2 sphereScreenPosition = returnScreenCoordinates(s.position);
-                    drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier);
+
+                    double red = 255 * s.color.X
+                                , green = 255 * s.color.Y
+                                , blue = 255 * s.color.Z;
+                    int pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
+                    
+                    drawCircle(sphereScreenPosition, (s as Sphere).radius * zMultiplier, pixelColor);
                 }
             }
+
+
+            for(int u = 0; u < screen.width * screen.height; u++) {
+                if(u % 1024 < 512)
+                    screen.pixels[u] = pixelBuffer[u];
+            }
+
+            //Debugging view:
+            screen.Print("Ray Tracer", 2, 2, 0xffffff);
+            screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
+            for (int i = 0; i < screen.height; i++)
+                screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
 
         }
 
 
 
-        public void drawCircle(Vector2 position, float radius)
+        public void drawCircle(Vector2 position, float radius, int color)
         {
             for (int i = 0; i < circleAccuracy - 1; i ++)
             {
-                screen.Line((int)(radius * cosTable[i] + position.X), (int)(radius * sinTable[i] + position.Y),(int)(radius * cosTable[i + 1] + position.X), (int)(radius * sinTable[i + 1] + position.Y), 0xffffff);
+                screen.Line((int)(radius * cosTable[i] + position.X), (int)(radius * sinTable[i] + position.Y),(int)(radius * cosTable[i + 1] + position.X), (int)(radius * sinTable[i + 1] + position.Y), color);
             }
 
         }
