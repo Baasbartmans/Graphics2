@@ -102,13 +102,13 @@ namespace Template
 
                         float lightSum = 0;
 
-                        Vector3 point =  ((float)distance * direction) - cam.position;
+                        Vector3 point = ((float)distance * direction) - cam.position;
 
                         //light and shadows
                         foreach (Light l in scene.lights)
                         {
                             Vector3 shadowRay = new Vector3(point - l.position);
-                            
+
                             Vector3 lightDirection = Vector3.Normalize(shadowRay);
 
                             if (currentPrim is Sphere)
@@ -139,41 +139,42 @@ namespace Template
                                     {
                                         float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
                                         lightSum = angle * distanceAttenuation;
-                                        
+
                                     }
                                 }
                             }
                         }
-                        
+
 
                         double red = 255 * currentPrim.color.X * (distAtten * 0.5 + lightSum * 0.5)
                             , green = 255 * currentPrim.color.Y * (distAtten * 0.5 + lightSum * 0.5)
                             , blue = 255 * currentPrim.color.Z * (distAtten * 0.5 + lightSum * 0.5);
                         pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
 
-                            pixelBuffer[(y + 256) * screen.width + (x + 256)] = pixelColor;
+                        pixelBuffer[(y + 256) * screen.width + (x + 256)] = pixelColor;
 
-                        }
                     }
+                //}
 
-                    Vector2 screenCam = returnScreenCoordinates(cam.position);
 
-                    if (y == 0)
+                Vector2 screenCam = returnScreenCoordinates(cam.position);
+
+                if (y == 0)
+                {
+                    Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
+
+                    if (x % 64 == 0)
                     {
-                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * (float)shortestDistance);
-                        
-                        if (x % 64 == 0)
-                        {
-                            screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
-                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y, 0xffff00);
-                        }
-
-
+                        screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                        screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowPosition.X, (int)shadowPosition.Y, 0xffff00);
                     }
 
-                    for (int i = -2; i < 3; i++)
-                        screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
-                }//for loop y
+
+                }
+
+                for (int i = -2; i < 3; i++)
+                    screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
+            }//for loop y
             }//(for loop x)
 
            
