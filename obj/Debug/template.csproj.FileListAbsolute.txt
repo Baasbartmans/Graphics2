@@ -1,15 +1,15 @@
 D:\Documents\Graphics2\bin\Debug\template.exe.config
 D:\School\Graphics\P2 Ray Tracer GitHub\bin\Debug\template.exe.config
-D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.exe.config
-D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.exe
-D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.pdb
-D:\School\Graphics\P2 Ray Tracer\bin\Debug\OpenTK.dll
-D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.csprojResolveAssemblyReference.cache
-D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.exe
-D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.pdb
 D:\Documents\Graphics2\obj\Debug\template.csprojResolveAssemblyReference.cache
 D:\Documents\Graphics2\bin\Debug\template.exe
 D:\Documents\Graphics2\bin\Debug\template.pdb
 D:\Documents\Graphics2\bin\Debug\OpenTK.dll
 D:\Documents\Graphics2\obj\Debug\template.exe
 D:\Documents\Graphics2\obj\Debug\template.pdb
+D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.exe.config
+D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.exe
+D:\School\Graphics\P2 Ray Tracer\bin\Debug\template.pdb
+D:\School\Graphics\P2 Ray Tracer\bin\Debug\OpenTK.dll
+D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.exe
+D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.pdb
+D:\School\Graphics\P2 Ray Tracer\obj\Debug\template.csprojResolveAssemblyReference.cache

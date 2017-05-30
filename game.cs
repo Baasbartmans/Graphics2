@@ -65,7 +65,7 @@ namespace Template {
 	    // tick: renders one frame
 	    public void Tick()
 	    {
-            scene.lights[0].position += new Vector3(1f,0,0);
+            scene.lights[0].position += new Vector3(0.4f,0,0);
 
             raytracer.Tick();
 
