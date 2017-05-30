@@ -298,7 +298,7 @@ namespace Template
 
             return pixelColor;
         }
-
+    
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
             if (aa == 2)
