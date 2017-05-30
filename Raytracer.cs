@@ -139,7 +139,7 @@ namespace Template
                 //bounce and normal debug
                 if (y == 0)
                 {
-                    if (x == 20)
+                    if (x % (int)(debugMod) == 0)
                     {
                         Vector2 snorm = returnScreenCoordinates(Vector3.Normalize(((distance * direction) + cam.position) - currentPrim.position) * 2 + currentPrim.position);
                         Vector2 mid = returnScreenCoordinates(currentPrim.position);
@@ -191,7 +191,7 @@ namespace Template
 
                 if (y == 0)
                 {
-                    if (x == 20)
+                    if (x % (int)(debugMod) == 0)
                     {
                         screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                         screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
@@ -240,7 +240,7 @@ namespace Template
                     }
 
                     if (y == 0)
-                        if (x == 20)
+                        if (x % (int)(debugMod) == 0)
                         {
                             Vector2 shadowRayScreenPosition = returnScreenCoordinates(cam.position + shadowRay);
                             screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0xffffff);
