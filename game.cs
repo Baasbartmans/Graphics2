@@ -92,6 +92,30 @@ namespace Template {
                     cam.yRotation -= 360;
                 cam.updateScreen();
             }
+            if (keystate.IsKeyDown(Key.W))
+            {
+                cam.position += cam.direction * 0.1f;
+            }
+            if (keystate.IsKeyDown(Key.D))
+            {
+                cam.position += cam.right * 0.1f;
+            }
+            if (keystate.IsKeyDown(Key.A))
+            {
+                cam.position += cam.left * 0.1f;
+            }
+            if (keystate.IsKeyDown(Key.S))
+            {
+                cam.position -= cam.direction * 0.1f;
+            }
+            if (keystate.IsKeyDown(Key.Space))
+            {
+                cam.position.Y -= 0.1f;
+            }
+            if (keystate.IsKeyDown(Key.ShiftLeft))
+            {
+                cam.position.Y += 0.1f;
+            }
         }
     }
 

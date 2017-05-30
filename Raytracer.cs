@@ -127,7 +127,7 @@ namespace Template
 
                 if (y == 0)
                 {
-                    if (x %64 == 0)
+                    if (x % 10 == 0)
                     {
                         Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                         screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
