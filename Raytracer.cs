@@ -18,6 +18,7 @@ namespace Template
         public float debugMod;
         public int sWidth, sHeight;
         public int sQuarterWidth, sHalfHeight;
+        public int aa = 1;
 
         int recursionDepth = 8;
 
@@ -284,17 +285,49 @@ namespace Template
 
             return pixelColor;
         }
-
+    
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
-            for (int x = -sQuarterWidth; x < sQuarterWidth; x++)
+            if (aa == 2)
             {
-                for (int y = -sHalfHeight; y < sHalfHeight; y++)
+                for (int x = -sQuarterWidth; x < sQuarterWidth; x++)
                 {
-                    pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = AugustRay(x, y,(x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
-                }//for loop y
-            }//(for loop x)
+                    for (int y = -sHalfHeight; y < sHalfHeight; y++)
+                    {
+                        pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+                    }//for loop y
+                }//(for loop x)
+            } else if (aa == 1)
+            {
+                for (int x = -sQuarterWidth; x < sQuarterWidth; x+=2)
+                {
+                    for (int y = -sHalfHeight; y < sHalfHeight; y+=2)
+                    {
+                        int bufferBuffer = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);
+                        pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = bufferBuffer;//
+                        pixelBuffer[(y + sHalfHeight) * sWidth + (x + 1 + sQuarterWidth)] = bufferBuffer;//
+                        pixelBuffer[(y + 1 + sHalfHeight) * sWidth + (x + sQuarterWidth)] = bufferBuffer;//
+                        pixelBuffer[(y + 1 + sHalfHeight) * sWidth + (x + 1 + sQuarterWidth)] = bufferBuffer;//
+                    }//for loop y
+                }//(for loop x)
+            } else if (aa == 3)
+            {
+                for (int x = -sQuarterWidth * 2; x < sQuarterWidth * 2; x++)
+                {
+                    for (int y = -sHalfHeight * 2; y < sHalfHeight * 2; y++)
+                    {
+                        if (x % 2 == 0 && y % 2 == 0)
+                        {
+                            pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] = 0;
+                        }
 
+                        int bufferBuffer = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4) >> 2);
+                        bufferBuffer &= 4144959;
+
+                        pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] += bufferBuffer;
+                    }//for loop y
+                }//(for loop x)
+            }
 
             //Debugging view:
 
@@ -320,6 +353,9 @@ namespace Template
             }
 
             screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 5, 5, 0xffffff);
+            screen.Print("Current FOV: " + cam.fov,sQuarterWidth * 2 + 5, 25, 0xffffff);
+            screen.Print("1-2-3 to pick antialiasing.", sQuarterWidth * 2 + 5, 45, 0xffffff);
+            screen.Print("x0.25, x1 and x4 respectively.", sQuarterWidth * 2 + 5, 65, 0xffffff);
             for (int i = 0; i < sHeight; i++)
                 screen.pixels[sWidth / 2 + i * sWidth] = 0xffffff;
 
