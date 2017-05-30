@@ -48,7 +48,7 @@ namespace Template
             Plane plane5 = new Plane(10, new Vector3(0, 0, -1), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane5);
 
-            Sphere sphere2 = new Sphere(new Vector3(-1.5f, 0, -2), 1, new Vector3(1, 1, 0.5f), true);
+            Sphere sphere2 = new Sphere(new Vector3(-1.5f, 0, -2), 1, new Vector3(1, 1, 0.5f), false);
                scene.primitives.Add(sphere2);
             
              Sphere sphere1 = new Sphere(new Vector3(0, 0, 0), 1, new Vector3(0.5f, 1, 1), true, 100);
