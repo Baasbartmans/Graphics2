@@ -418,15 +418,15 @@ namespace Template
                     SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere, origin), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
                 }
             }
-            if (curPrim is Sphere)
-            {
-                int g = 0;
-            }
 
-            distance = dist;
-            prim = curPrim;
-            exitDir = direction;
-            exitOrg = (dist * direction) + origin;
+                distance = dist;
+                prim = curPrim;
+                exitDir = direction;
+                exitOrg = (dist * direction) + origin;
+            //distance = dist;
+            //prim = curPrim;
+            //exitDir = direction;
+            //exitOrg = (dist * direction) + origin;
         }
 
 
