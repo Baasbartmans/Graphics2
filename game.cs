@@ -26,8 +26,8 @@ namespace Template
             Light light2 = new Light(new Vector3(-3, -10, 0), new Vector3(1, 1f, 1f));
             scene.lights.Add(light2);
 
-            //  Light light = new Light(new Vector3(-15f, -5, 0));
-            //scene.lights.Add(light);
+           //   Light light = new Light(new Vector3(-15f, -5, 0), new Vector3(1f,1, 1));
+           // scene.lights.Add(light);
 
 
 
@@ -39,13 +39,16 @@ namespace Template
             Plane plane2 = new Plane(5, new Vector3(-1, 0, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane2);
 
-            Plane plane3 = new Plane(3, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
+            Plane plane3 = new Plane(5, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane3);
 
-            Plane plane4 = new Plane(-10, new Vector3(0, 0, -1), new Vector3(1, 1, 1), false);
+            Plane plane4 = new Plane(10, new Vector3(0, 0, 1), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane4);
 
-              Sphere sphere2 = new Sphere(new Vector3(-1.5f, 0, -2), 1, new Vector3(1, 1, 0.5f), true);
+            Plane plane5 = new Plane(10, new Vector3(0, 0, -1), new Vector3(1, 1, 1), false);
+            scene.primitives.Add(plane5);
+
+            Sphere sphere2 = new Sphere(new Vector3(-1.5f, 0, -2), 1, new Vector3(1, 1, 0.5f), true);
                scene.primitives.Add(sphere2);
             
              Sphere sphere1 = new Sphere(new Vector3(0, 0, 0), 1, new Vector3(0.5f, 1, 1), true, 100);
@@ -66,7 +69,7 @@ namespace Template
         // tick: renders one frame
         public void Tick()
         {
-            //scene.lights[0].position += new Vector3(1f,0,0);
+           // scene.lights[0].position += new Vector3(1f,0,0);
 
             raytracer.Tick();
 

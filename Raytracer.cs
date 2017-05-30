@@ -19,7 +19,7 @@ namespace Template
         public int sWidth, sHeight;
         public int sQuarterWidth, sHalfHeight;
 
-        int recursionDepth = 0;
+        int recursionDepth = 8;
 
         int sphereCount;
         int planeCount;
@@ -218,19 +218,18 @@ namespace Template
                             lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                             //Console.WriteLine(lightSum);
                             if (y == 0)
+                            { 
                                 if (x % (int)(debugMod) == 0)
                                 {
                                     screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                                     Vector2 shadowRayScreenPosition = returnScreenCoordinates(point + new Vector3(-shadowRay.X, 0, -shadowRay.Z));
                                     screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
                                 }
-                        }
+                            }
                         
-                    }
-                            else
-                                lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position) + basePrim.color;
+                            }   
                         }
-                    }
+                    //}
 
                     //checkt voor plane hoe de schaduwen vallen
                     if (currentPrim is Plane)
@@ -238,18 +237,6 @@ namespace Template
                         float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
                         lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                     }
-
-                    //bij partial reflection moet de basis ook berekend worden.
-                    //if (basePrim is Sphere && basePrim.reflective)
-                    //{
-                    //    Vector3 sphereNormal = Vector3.Normalize(basePrim.position - ((baseDir * baseDist) + cam.position));
-                    //    float angle = Vector3.Dot(sphereNormal, baselightDirection);
-                    //    if (angle > epsilon)
-                    //    {
-                    //        float distanceAttenuation = 1 - (1 / (baseRay.Length * baseRay.Length));
-                    //        baseSum += LightSumCalc(l, baseDir, baseDist, angle, basePrim, cam.position);
-                    //    }
-                    //}
 
                     if (y == 0)
                         if (x == 20)
@@ -261,9 +248,9 @@ namespace Template
 
                 float red = 0, green = 0, blue = 0;
 
-                    red = 255 * (currentPrim.color.X * lightSum.X) * basePrim.color.X;
-                    green = 255 * (currentPrim.color.Y * lightSum.Y) * basePrim.color.Y;
-                    blue = 255 * (currentPrim.color.Z * lightSum.Z) * basePrim.color.Z;
+                red = 255 * (currentPrim.color.X * lightSum.X)* (basePrim.color.X);
+                green = 255 * (currentPrim.color.Y * lightSum.Y) * (basePrim.color.Y);
+                blue = 255 * (currentPrim.color.Z * lightSum.Z) * (basePrim.color.Z);
 
 
 
