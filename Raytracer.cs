@@ -22,7 +22,8 @@ namespace Template
 
         float maxDist = 1 / 5f;
 
-        public float div = (1f / 256f);
+        public float divX;
+        public float divY;
 
         const float epsilon = 0.001f;
 
@@ -38,12 +39,11 @@ namespace Template
 
         public Raytracer(Camera cam, Scene scene, Surface displaySurf)
         {
-
+            
             this.cam = cam;
             this.scene = scene;
             this.displaySurf = displaySurf;
 
-            pixelBuffer = new int[1024 * 512];
 
             const float oneOverCircleAccuracy = 1 / circleAccuracy;
             const float tableMultiplier = (float)Math.PI * 2 / (circleAccuracy - 1);
@@ -65,6 +65,11 @@ namespace Template
                 }
             }
 
+        public void InitializeOutside()
+        {
+            pixelBuffer = new int[screen.height * screen.width];
+            divX = 4f / screen.width;
+            divY = 2f / screen.height;
         }
 
         public void Tick()
@@ -154,7 +159,7 @@ namespace Template
 
                 if (y == 0)
                 {
-                    if (x % 64 == 0)
+                    if (x % 10 == 0)
                     {
                         Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                         screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
@@ -190,7 +195,7 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y, (x * div * cam.right) + (y * div * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y,(x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
                 }//for loop y
             }//(for loop x)
 
@@ -218,15 +223,12 @@ namespace Template
                     screen.pixels[u] = pixelBuffer[u];
             }
 
-            screen.Print("Ray Tracer", 2, 2, 0xffffff);
-            screen.Print("Debug view", screen.width / 2 + 2, 2, 0xffffff);
+            screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 2, 2, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
 
-            Vector2 screenFirst = returnScreenCoordinates(cam.screen[0]);
-            Vector2 screenSecond = returnScreenCoordinates(cam.screen[1]);
-            //Vector2 screenThird = returnScreenCoordinates(cam.screen[2]);
-            //Vector2 screenFourth = returnScreenCoordinates(cam.screen[3]);
+            Vector2 screenFirst = returnScreenCoordinates(cam.position + cam.left + cam.direction);
+            Vector2 screenSecond = returnScreenCoordinates(cam.position + cam.right + cam.direction);
 
             screen.Line((int)screenFirst.X, (int)screenFirst.Y, (int)screenSecond.X, (int)screenSecond.Y, 0xffffff);//deze moet iets anders tekenen op het moment dat je omhoog kijkt ....
         }

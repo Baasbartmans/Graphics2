@@ -12,12 +12,10 @@ namespace template
         public Vector3 position;
         public Vector3 direction;
         public Vector3[] screen;
-        public float fov;
+        public int fov;
         public float screenDistance;
-        public float screenZ;
         public int xRotation;
         public int yRotation;
-        public int zRotation;
 
         public Vector3 right;
         public Vector3 left;
@@ -37,36 +35,44 @@ namespace template
             {
                 cosTable[i] = (float)Math.Cos(i * toRads);
                 sinTable[i] = (float)Math.Sin(i * toRads);
-            }   
+            }
 
-            fov = 10;
-            screenDistance = 1 / fov;//dit moet verplicht aangepast worden, fov moet werken enzo
+            Initialize();
 
-            screenDistance = 2;
+        }
 
-            position = new Vector3(0,0,-4);
+        public void Initialize()
+        {
+            fov = 110;
 
-            screenZ = position.Z + screenDistance;
+            //bij collision met plane, de plane evt. tekenen voor debug view
+
+            position = new Vector3(0, 0, -4);
 
             xRotation = 0;
             yRotation = 0;
 
-            
 
-            updateScreen();
 
+            UpdateScreen();
         }
 
-        public void updateScreen()
+        public void UpdateScreen()
         {
+
             direction = new Vector3(sinTable[xRotation], sinTable[yRotation], cosTable[xRotation] * cosTable[yRotation]);
             Vector3 dirPos = direction + position;
 
-            right = new Vector3(cosTable[xRotation], 0, -sinTable[xRotation]);
+            //imaginary x = sinTable[fov / 2];
+            //imaginary z = cosTable[fov / 2];
+            //x en diepte van linker uiteinde van het scherm
+            //als je ze beide  door de diepte deelt heb je x / diepte en 1
+            screenDistance = sinTable[fov / 2] / cosTable[fov / 2];
+
+            right = screenDistance * new Vector3(cosTable[xRotation], 0, -sinTable[xRotation]);
             left = -right;
             up = Vector3.Cross(direction, right);
             down = -up;
-
 
             screen = new Vector3[4] {
                 dirPos + left + up,
