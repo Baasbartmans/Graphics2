@@ -105,19 +105,19 @@ namespace Template {
             }
             if (keystate.IsKeyDown(Key.W))
             {
-                cam.position += cam.direction * 0.1f;
+                cam.position += 0.1f * Vector3.Normalize(new Vector3(cam.direction.X, 0, cam.direction.Z));
             }
             if (keystate.IsKeyDown(Key.D))
             {
-                cam.position += cam.right * 0.1f;
+                cam.position += 0.1f * Vector3.Normalize(new Vector3(cam.right.X, 0, cam.right.Z));
             }
             if (keystate.IsKeyDown(Key.A))
             {
-                cam.position += cam.left * 0.1f;
+                cam.position += 0.1f * Vector3.Normalize(new Vector3(cam.left.X, 0, cam.left.Z));
             }
             if (keystate.IsKeyDown(Key.S))
             {
-                cam.position -= cam.direction * 0.1f;
+                cam.position -= 0.1f * Vector3.Normalize(new Vector3(cam.direction.X, 0, cam.direction.Z));
             }
             if (keystate.IsKeyDown(Key.Space))
             {
@@ -146,6 +146,10 @@ namespace Template {
                     cam.fov--;
                     cam.UpdateScreen();
                 }
+            }
+            if (keystate.IsKeyDown(Key.T))
+            {
+                Console.WriteLine("TestOutput");
             }
         }
     }
