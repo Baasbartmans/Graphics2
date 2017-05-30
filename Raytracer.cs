@@ -14,6 +14,10 @@ namespace Template
         public Scene scene;
         public Camera cam;
         public Surface displaySurf;
+        public int debugLines = 10;
+        public float debugMod;
+        public int sWidth, sHeight;
+        public int sQuarterWidth, sHalfHeight;
 
         int recursionDepth = 0;
 
@@ -44,7 +48,6 @@ namespace Template
             this.scene = scene;
             this.displaySurf = displaySurf;
 
-
             const float oneOverCircleAccuracy = 1 / circleAccuracy;
             const float tableMultiplier = (float)Math.PI * 2 / (circleAccuracy - 1);
             for (int i = 0; i < circleAccuracy; i++)
@@ -66,11 +69,30 @@ namespace Template
             }
         }
 
+        public int xHalfWorldSize;
+        public int xWorldSize;
+        public int xMultiplier;
+        public int zHalfWorldSize;
+        public int zWorldSize;
+        public int zMultiplier;
+
         public void InitializeOutside()
         {
-            pixelBuffer = new int[screen.height * screen.width];
-            divX = 4f / screen.width;
-            divY = 2f / screen.height;
+            sWidth = screen.width;
+            sQuarterWidth = sWidth / 4;
+            sHeight = screen.height;
+            sHalfHeight = sHeight / 2;
+            debugMod = sWidth / (debugLines * 2);
+            pixelBuffer = new int[sHeight * sWidth];
+            divX = 4f / sWidth;
+            divY = 2f / sHeight;
+
+            xHalfWorldSize = 5;
+            xWorldSize = xHalfWorldSize * 2;
+            xMultiplier = sWidth / (2 * xWorldSize);
+            zHalfWorldSize = 5;
+            zWorldSize = zHalfWorldSize * 2;
+            zMultiplier = sHeight / zWorldSize;
         }
 
         public void Tick()
@@ -147,6 +169,7 @@ namespace Template
             }
 
 
+
             if (distance != 0 && currentPrim != null)
             {
 
@@ -193,6 +216,17 @@ namespace Template
                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
                             if(!currentPrim.reflective)
                             lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
+                            //Console.WriteLine(lightSum);
+                            if (y == 0)
+                                if (x % (int)(debugMod) == 0)
+                                {
+                                    screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                                    Vector2 shadowRayScreenPosition = returnScreenCoordinates(point + new Vector3(-shadowRay.X, 0, -shadowRay.Z));
+                                    screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
+                                }
+                        }
+                        
+                    }
                             else
                                 lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position) + basePrim.color;
                         }
@@ -242,10 +276,23 @@ namespace Template
             }
 
 
+            if (y == 0)
+            {
+                if (x % (int)(debugMod) == 0)
+                {
+                    screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                    
+                    Vector2 normalizedPosition = returnScreenCoordinates(cam.position + direction);
+                    screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xffff00);
+                    screen.Line((int)screenCam.X, (int)screenCam.Y, (int)normalizedPosition.X, (int)normalizedPosition.Y, 0xff0000);
+                }
+            }
+
+
 
             for (int i = -2; i < 3; i++)
             {
-                screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x0000ff);
+                screen.Line((int)screenCam.X - 2, (int)screenCam.Y + i, (int)screenCam.X + 2, (int)screenCam.Y + i, 0x00ff00);
             }
 
             return pixelColor;
@@ -253,12 +300,11 @@ namespace Template
 
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
-            for (int x = -256; x < 256; x++)
+            for (int x = -sQuarterWidth; x < sQuarterWidth; x++)
             {
-                for (int y = -256; y < 256; y++)
+                for (int y = -sHalfHeight; y < sHalfHeight; y++)
                 {
-
-                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+                    pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = AugustRay(x, y,(x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
                 }//for loop y
             }//(for loop x)
 
@@ -280,15 +326,15 @@ namespace Template
                 }
             }
 
-            for (int u = 0; u < screen.width * screen.height; u++)
+            for (int u = 0; u < sWidth * sHeight; u++)
             {
-                if (u % 1024 < 512)
+                if (u % sWidth < sHeight)
                     screen.pixels[u] = pixelBuffer[u];
             }
 
             screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 5, 5, 0xffffff);
-            for (int i = 0; i < screen.height; i++)
-                screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
+            for (int i = 0; i < sHeight; i++)
+                screen.pixels[sWidth / 2 + i * sWidth] = 0xffffff;
 
             Vector2 screenFirst = returnScreenCoordinates(cam.position + cam.left + cam.direction);
             Vector2 screenSecond = returnScreenCoordinates(cam.position + cam.right + cam.direction);
@@ -483,12 +529,7 @@ namespace Template
             }
         }
 
-        static public int xHalfWorldSize = 5;
-        public static int xWorldSize = xHalfWorldSize * 2;
-        public int xMultiplier = 512 / xWorldSize;
-        static public int zHalfWorldSize = 5;
-        public static int zWorldSize = zHalfWorldSize * 2;
-        public int zMultiplier = 512 / zWorldSize;
+
 
         public Vector2 returnScreenCoordinates(Vector3 oldCoords)
         {
@@ -497,7 +538,7 @@ namespace Template
             coords.Y -= zHalfWorldSize;
 
             coords.X *= xMultiplier;
-            coords.X += 512;
+            coords.X += sWidth * 0.5f;
             coords.Y *= -zMultiplier;
             return coords;
         }
