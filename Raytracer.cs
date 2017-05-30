@@ -81,7 +81,7 @@ namespace Template
         }
 
 
-
+        Vector2 screenPosition;
 
         int AugustRay(int x, int y, Vector3 screenpoint, int limit)
         {
@@ -133,6 +133,16 @@ namespace Template
 
                 float angleSum = 0;
 
+                if (y == 0)
+                {
+                    if (x % 10 == 0)
+                    {
+                        screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                        screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
+                    }
+
+                }
+
                 //light and shadows
                 foreach (Light l in scene.lights)
                 {
@@ -159,19 +169,17 @@ namespace Template
                         float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
                         lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                     }
+                    if(y == 0)
+                        if(x % 10 == 0)
+                        {
+                            Vector2 shadowRayScreenPosition = returnScreenCoordinates(cam.position + shadowRay);
+                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0xffffff);
+                        }
                 }
 
 
 
-                if (y == 0)
-                {
-                    if (x % 10 == 0)
-                    {
-                        Vector2 screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
-                        screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
-                    }
 
-                }
 
                 float red = 255 * currentPrim.color.X * lightSum.X
                     , green = 255 * currentPrim.color.Y * lightSum.Y
@@ -229,7 +237,7 @@ namespace Template
                     screen.pixels[u] = pixelBuffer[u];
             }
 
-            screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 2, 2, 0xffffff);
+            screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 5, 5, 0xffffff);
             for (int i = 0; i < screen.height; i++)
                 screen.pixels[screen.width / 2 + i * screen.width] = 0xffffff;
 
