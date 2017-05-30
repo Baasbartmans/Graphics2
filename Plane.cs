@@ -13,12 +13,12 @@ namespace template
         public Vector3 normal;
         public Vector3 point;
 
-        public Plane(float distance, Vector3 normal, Vector3 color, bool reflective): base(color, reflective)
+        public Plane(float distance, Vector3 normal, Vector3 color, bool reflective, float percent = 100) : base(color, reflective, percent)
         {
             this.normal = normal;
             this.distance = distance;
             point = distance * normal;
-            
+            base.percent = percent / 100f;
         }
     }
 }
