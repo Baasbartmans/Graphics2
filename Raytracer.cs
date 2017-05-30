@@ -20,7 +20,9 @@ namespace Template
         public int sQuarterWidth, sHalfHeight;
         public int aa = 1;
 
-        int recursionDepth = 8;
+
+
+        int recursionDepth = 100;
 
         int sphereCount;
         int planeCount;
@@ -106,14 +108,19 @@ namespace Template
 
         Vector2 screenPosition;
 
-        int AugustRay(int x, int y, Vector3 screenpoint, int limit)
+        Vector3 AugustRay(int x, int y, Vector3 screenpoint, int limit)
         {
+            bool black = true;
             Vector3 direction = Vector3.Normalize(screenpoint - cam.position);
             Vector2 screenCam = returnScreenCoordinates(cam.position);
-            int pixelColor = 0;
+            Vector3 pixelColor = Vector3.Zero;
             float distAtten = 0;
             Vector3 lightSum = Vector3.Zero;
+            Vector3 baselightSum = Vector3.Zero;
             Vector3 baseSum = Vector3.Zero;
+            Primitive basePrim = null;
+            float baseDist = 0;
+            Vector3 baseDir = Vector3.Zero;
 
             float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
@@ -121,17 +128,18 @@ namespace Template
             float distance = 0;
             Primitive currentPrim = null;
             ClosestPrim(cam.position, direction, 0, out currentPrim, out distance);
-            Primitive basePrim = currentPrim;
-            float baseDist = distance;
-            Vector3 baseDir = direction;
+            basePrim = currentPrim;
+            baseDist = distance;
+            baseDir = direction;
+
+           
+            baselightSum = doehetnou(distance, currentPrim, direction);
 
             float recDist = 0;
             Vector3 recDir;
             Primitive recPrim = null;
             Vector3 origin = cam.position;
             Vector3 recOrg;
-
-
 
             if (currentPrim is Sphere && currentPrim.reflective)
             {
@@ -157,13 +165,13 @@ namespace Template
 
                 SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere, origin), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
 
-                if (recDist > 0)
-                    distance = recDist;
+                //if (recDist > 0)
+                //    distance = recDist;
 
-                else
-                {
-                    lightSum += new Vector3(0.1f, 0.1f, 0.1f);
-                }
+                //else
+                //{
+                //    lightSum += new Vector3(0.1f, 0.1f, 0.1f);
+                //}
                 currentPrim = recPrim;
                 origin = recOrg;
                 direction = recDir;
@@ -199,6 +207,15 @@ namespace Template
 
                 }
 
+                //texturing voor de reflectie
+                if (currentPrim is Plane)
+                {
+                    int roundOff = (int)new Vector3((direction * distance) + origin).Z;
+                    if (roundOff % 2 == 0) currentPrim.color = new Vector3(1, 1, 1);
+                    else currentPrim.color = new Vector3(0.1f, 0.1f, 0.1f);
+                }
+
+                #region main light
                 //light and shadows
                 foreach (Light l in scene.lights)
                 {
@@ -215,11 +232,11 @@ namespace Template
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
-                            if(!currentPrim.reflective)
+                            // if (!currentPrim.reflective)
                             lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                             //Console.WriteLine(lightSum);
                             if (y == 0)
-                            { 
+                            {
                                 if (x % (int)(debugMod) == 0)
                                 {
                                     screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
@@ -227,9 +244,9 @@ namespace Template
                                     screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
                                 }
                             }
-                        
-                            }   
+
                         }
+                    }
                     //}
 
                     //checkt voor plane hoe de schaduwen vallen
@@ -246,12 +263,13 @@ namespace Template
                             screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0xffffff);
                         }
                 }
+                #endregion
 
                 float red = 0, green = 0, blue = 0;
 
-                red = 255 * (currentPrim.color.X * lightSum.X)* (basePrim.color.X);
-                green = 255 * (currentPrim.color.Y * lightSum.Y) * (basePrim.color.Y);
-                blue = 255 * (currentPrim.color.Z * lightSum.Z) * (basePrim.color.Z);
+                red = 255 * (currentPrim.color.X * (lightSum.X * 0.5f + baselightSum.X * 0.5f))* (basePrim.color.X);
+                green = 255 * (currentPrim.color.Y * (lightSum.Y * 0.5f + baselightSum.Y * 0.5f)) * (basePrim.color.Y);
+                blue = 255 * (currentPrim.color.Z * (lightSum.Z * 0.5f + baselightSum.Z * 0.5f)) * (basePrim.color.Z);
 
 
 
@@ -260,7 +278,7 @@ namespace Template
                 blue = Clamp(blue, 0, 255);
 
 
-                pixelColor = ((int)red * 65536) + ((int)green * 256) + ((int)blue);
+                pixelColor = new Vector3(red, green, blue);
             }
 
 
@@ -269,7 +287,7 @@ namespace Template
                 if (x % (int)(debugMod) == 0)
                 {
                     screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
-                    
+
                     Vector2 normalizedPosition = returnScreenCoordinates(cam.position + direction);
                     screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xffff00);
                     screen.Line((int)screenCam.X, (int)screenCam.Y, (int)normalizedPosition.X, (int)normalizedPosition.Y, 0xff0000);
@@ -285,7 +303,56 @@ namespace Template
 
             return pixelColor;
         }
-    
+
+        public Vector3 doehetnou(float baseDist, Primitive basePrim, Vector3 baseDir)
+        {
+            Vector3 baselightSum = Vector3.Zero;
+
+            if (baseDist != 0 && basePrim != null)
+            {
+                //Vector3 point = (distance * direction) - cam.position;
+                Vector3 basePoint = (baseDist * baseDir) - cam.position;
+
+                #region base reflection
+                //light and shadows
+                if (basePrim.reflective)
+                {
+                    foreach (Light l in scene.lights)
+                    {
+                        // Vector3 shadowRay = new Vector3(point - l.position);
+                        Vector3 baseRay = new Vector3(basePoint - l.position);
+
+                        //Vector3 lightDirection = Vector3.Normalize(shadowRay);
+                        Vector3 baselightDirection = Vector3.Normalize(baseRay);
+
+                        if (basePrim is Sphere)
+                        {
+                            Vector3 sphereNormal = Vector3.Normalize(basePrim.position - ((baseDir * baseDist) + cam.position));
+                            float angle = Vector3.Dot(sphereNormal, baselightDirection);
+                            if (angle > epsilon)
+                            {
+                                float distanceAttenuation = 1 - (1 / (baseRay.Length * baseRay.Length));
+                                // if (!currentPrim.reflective)
+                                baselightSum += LightSumCalc(l, baseDir, baseDist, angle, basePrim, cam.position);
+                            }
+                        }
+                        //}
+
+                        //checkt voor plane hoe de schaduwen vallen
+                        if (basePrim is Plane)
+                        {
+                            float angle = Vector3.Dot((basePrim as Plane).normal, baselightDirection);
+                            baselightSum += LightSumCalc(l, baseDir, baseDist, angle, basePrim, cam.position);
+                        }
+                    }
+                }
+                #endregion
+
+                
+            }
+            return baselightSum;
+        }
+
         public void Render(Camera cam, Scene scene, Surface displaySurf)
         {
             if (aa == 2)
@@ -294,37 +361,52 @@ namespace Template
                 {
                     for (int y = -sHalfHeight; y < sHalfHeight; y++)
                     {
-                        pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+                        Vector3 color = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);
+                        int finalColor = (((int)color.X * 65536) + ((int)color.Y * 256) + (int)color.Z);
+                        pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = finalColor;//screenpoint inserted here
                     }//for loop y
                 }//(for loop x)
-            } else if (aa == 1)
+            }
+            else if (aa == 1)
             {
-                for (int x = -sQuarterWidth; x < sQuarterWidth; x+=2)
+                for (int x = -sQuarterWidth; x < sQuarterWidth; x += 2)
                 {
-                    for (int y = -sHalfHeight; y < sHalfHeight; y+=2)
+                    for (int y = -sHalfHeight; y < sHalfHeight; y += 2)
                     {
-                        int bufferBuffer = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);
+                        Vector3 color = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);
+                        int finalColor = (((int)color.X * 65536) + ((int)color.Y * 256) + (int)color.Z);
+
+                        int bufferBuffer = finalColor;
                         pixelBuffer[(y + sHalfHeight) * sWidth + (x + sQuarterWidth)] = bufferBuffer;//
                         pixelBuffer[(y + sHalfHeight) * sWidth + (x + 1 + sQuarterWidth)] = bufferBuffer;//
                         pixelBuffer[(y + 1 + sHalfHeight) * sWidth + (x + sQuarterWidth)] = bufferBuffer;//
                         pixelBuffer[(y + 1 + sHalfHeight) * sWidth + (x + 1 + sQuarterWidth)] = bufferBuffer;//
                     }//for loop y
                 }//(for loop x)
-            } else if (aa == 3)
+            }
+            else if (aa == 3)
             {
-                for (int x = -sQuarterWidth * 2; x < sQuarterWidth * 2; x++)
+                for (int x = -sQuarterWidth * 2; x < sQuarterWidth * 2; x += 2)
                 {
-                    for (int y = -sHalfHeight * 2; y < sHalfHeight * 2; y++)
+                    for (int y = -sHalfHeight * 2; y < sHalfHeight * 2; y += 2)
                     {
-                        if (x % 2 == 0 && y % 2 == 0)
-                        {
-                            pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] = 0;
-                        }
+                        float red = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).X + AugustRay(x + 1, y, ((x + 1) * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).X + AugustRay(x, y + 1, (x * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).X + AugustRay(x + 1, y + 1, ((x + 1) * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).X) * 0.25f;
+                        float green = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Y + AugustRay(x + 1, y, ((x + 1) * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Y + AugustRay(x, y + 1, (x * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Y + AugustRay(x + 1, y + 1, ((x + 1) * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Y) * 0.25f;
+                        float blue = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Z + AugustRay(x + 1, y, ((x + 1) * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Z + AugustRay(x, y + 1, (x * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Z + AugustRay(x + 1, y + 1, ((x + 1) * 0.5f * divX * cam.right) + ((y + 1) * 0.5f * divY * cam.up) + cam.position + cam.direction, 4).Z) * 0.25f;
 
-                        int bufferBuffer = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4) >> 2);
-                        bufferBuffer &= 4144959;
+                        int finalColor = (((int)red * 65536) + ((int)green * 256) + (int)blue);
 
-                        pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] += bufferBuffer;
+                        pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] = finalColor;
+
+                        //if (x % 2 == 0 && y % 2 == 0)
+                        //{
+                        //    pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] = 0;
+                        //}
+
+                        //int bufferBuffer = (AugustRay(x, y, (x * 0.5f * divX * cam.right) + (y * 0.5f * divY * cam.up) + cam.position + cam.direction, 4) >> 2);
+                        //bufferBuffer &= 4144959;
+
+                        //pixelBuffer[(y / 2 + sHalfHeight) * sWidth + (x / 2 + sQuarterWidth)] += bufferBuffer;
                     }//for loop y
                 }//(for loop x)
             }
@@ -353,7 +435,7 @@ namespace Template
             }
 
             screen.Print("WASD and Arrow keys to move, R to reset, F and G to change FOV", 5, 5, 0xffffff);
-            screen.Print("Current FOV: " + cam.fov,sQuarterWidth * 2 + 5, 25, 0xffffff);
+            screen.Print("Current FOV: " + cam.fov, sQuarterWidth * 2 + 5, 25, 0xffffff);
             screen.Print("1-2-3 to pick antialiasing.", sQuarterWidth * 2 + 5, 45, 0xffffff);
             screen.Print("x0.25, x1 and x4 respectively.", sQuarterWidth * 2 + 5, 65, 0xffffff);
             for (int i = 0; i < sHeight; i++)
@@ -419,10 +501,10 @@ namespace Template
                 }
             }
 
-                distance = dist;
-                prim = curPrim;
-                exitDir = direction;
-                exitOrg = (dist * direction) + origin;
+            distance = dist;
+            prim = curPrim;
+            exitDir = direction;
+            exitOrg = (dist * direction) + origin;
             //distance = dist;
             //prim = curPrim;
             //exitDir = direction;
