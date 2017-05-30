@@ -71,6 +71,18 @@ namespace Template {
 
             KeyboardState keystate = Keyboard.GetState();
 
+            if (keystate.IsKeyDown(Key.Number1))
+            {
+                raytracer.aa = 1;
+            }
+            if (keystate.IsKeyDown(Key.Number2))
+            {
+                raytracer.aa = 2;
+            }
+            if (keystate.IsKeyDown(Key.Number3))
+            {
+                raytracer.aa = 3;
+            }
             if (keystate.IsKeyDown(Key.Left))
             {
                 cam.xRotation -= 8;
