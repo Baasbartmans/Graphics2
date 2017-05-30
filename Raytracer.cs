@@ -14,7 +14,7 @@ namespace Template
         public Scene scene;
         public Camera cam;
         public Surface displaySurf;
-        public int debugLines = 10;
+        public int debugLines = 1;
         public float debugMod;
         public int sWidth, sHeight;
         public int sQuarterWidth, sHalfHeight;
@@ -147,23 +147,21 @@ namespace Template
                 //bounce and normal debug
                 if (y == 0)
                 {
-                    if (x == 20)
+                    if (x % (int)(debugMod) == 0)
                     {
-                        Vector2 snorm = returnScreenCoordinates(Vector3.Normalize(((distance * direction) + cam.position) - currentPrim.position) * 2 + currentPrim.position);
-                        Vector2 mid = returnScreenCoordinates(currentPrim.position);
-                        screen.Line((int)mid.X, (int)mid.Y, (int)snorm.X, (int)snorm.Y, 0x00ff00);
-
-
                         Vector3 bounce = Bounce(direction, distance, currentPrim as Sphere, cam.position);
                         Vector2 begin = returnScreenCoordinates((distance * direction) + cam.position);
                         Vector2 eind = returnScreenCoordinates(bounce + ((distance * direction) + cam.position));
 
-                        screen.Line((int)begin.X, (int)begin.Y, (int)eind.X, (int)eind.Y, 0x0000ff);
+                        Vector2 kamera = returnScreenCoordinates(cam.position);
+
+                        screen.Line((int)begin.X, (int)begin.Y, (int)eind.X, (int)eind.Y, 0xffff00);
+                        screen.Line((int)kamera.X, (int)kamera.Y, (int)begin.X, (int)begin.Y, 0xffff00);
                     }
 
                 }
 
-                SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere, origin), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
+                SecRay(x,y,(distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere, origin), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
 
                 //if (recDist > 0)
                 //    distance = recDist;
@@ -199,7 +197,7 @@ namespace Template
 
                 if (y == 0)
                 {
-                    if (x == 20)
+                    if (x % (int)(debugMod) == 0)
                     {
                         screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                         screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
@@ -241,7 +239,7 @@ namespace Template
                                 {
                                     screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                                     Vector2 shadowRayScreenPosition = returnScreenCoordinates(point + new Vector3(-shadowRay.X, 0, -shadowRay.Z));
-                                    screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
+                                    //screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
                                 }
                             }
 
@@ -257,11 +255,14 @@ namespace Template
                     }
 
                     if (y == 0)
-                        if (x == 20)
+                    {
+                        if (x % (int)(debugMod) == 0)
                         {
-                            Vector2 shadowRayScreenPosition = returnScreenCoordinates(cam.position + shadowRay);
-                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0xffffff);
+                            screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
+                            Vector2 shadowRayScreenPosition = returnScreenCoordinates(point + new Vector3(-shadowRay.X, 0, -shadowRay.Z));
+                            screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0x0000ff);
                         }
+                    }
                 }
                 #endregion
 
@@ -488,7 +489,7 @@ namespace Template
             return lightSum * l.color;
         }
 
-        public void SecRay(Vector3 origin, Vector3 direction, int recDepth, out float distance, out Primitive prim, out Vector3 exitDir, out Vector3 exitOrg)
+        public void SecRay(int x, int y, Vector3 origin, Vector3 direction, int recDepth, out float distance, out Primitive prim, out Vector3 exitDir, out Vector3 exitOrg)
         {
             Primitive curPrim;
             float dist;
@@ -497,8 +498,19 @@ namespace Template
             {
                 if (curPrim.reflective && recDepth > 0)
                 {
-                    SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere, origin), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
+                    SecRay(x,y,(dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere, origin), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
                 }
+            }
+            if (y == 0)
+            {
+                if (x % (int)(debugMod) == 0)
+                {
+                    Vector2 begin = returnScreenCoordinates((dist * direction) + cam.position);
+
+                    Vector2 origin2 = returnScreenCoordinates(origin);
+                    screen.Line((int)origin2.X, (int)origin2.Y, (int)begin.X, (int)begin.Y, 0xffff00);
+                }
+
             }
 
             distance = dist;
