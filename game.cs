@@ -56,7 +56,6 @@ namespace Template {
 
             raytracer = new Raytracer(cam, scene, displaySurf);
             raytracer.screen = screen;
-            raytracer.InitializeOutside();
         }
 	    // tick: renders one frame
 	    public void Tick()
@@ -70,32 +69,28 @@ namespace Template {
                 cam.xRotation -= 8;
                 if (cam.xRotation < 0)
                     cam.xRotation += 360;
-                cam.UpdateScreen();
+                cam.updateScreen();
             }
             if (keystate.IsKeyDown(Key.Right))
             {
                 cam.xRotation += 8;
                 if (cam.xRotation > 359)
                     cam.xRotation -= 360;
-                cam.UpdateScreen();
+                cam.updateScreen();
             }
             if (keystate.IsKeyDown(Key.Up))
             {
                 cam.yRotation -= 8;
                 if (cam.yRotation < 0)
                     cam.yRotation += 360;
-                if (cam.yRotation > 90 && cam.yRotation < 270)
-                    cam.yRotation = 270;
-                cam.UpdateScreen();
+                cam.updateScreen();
             }
             if (keystate.IsKeyDown(Key.Down))
             {
                 cam.yRotation += 8;
                 if (cam.yRotation > 359)
                     cam.yRotation -= 360;
-                if (cam.yRotation > 90 && cam.yRotation < 270)
-                    cam.yRotation = 90;
-                cam.UpdateScreen();
+                cam.updateScreen();
             }
             if (keystate.IsKeyDown(Key.W))
             {
@@ -115,31 +110,11 @@ namespace Template {
             }
             if (keystate.IsKeyDown(Key.Space))
             {
-                cam.position.Y -= 0.15f;
+                cam.position.Y -= 0.1f;
             }
             if (keystate.IsKeyDown(Key.ShiftLeft))
             {
-                cam.position.Y += 0.15f;
-            }
-            if (keystate.IsKeyDown(Key.R))
-            {
-                cam.Initialize();
-            }
-            if (keystate.IsKeyDown(Key.F))
-            {
-                if (cam.fov < 179)
-                {
-                    cam.fov++;
-                    cam.UpdateScreen();
-                }
-            }
-            if (keystate.IsKeyDown(Key.G))
-            {
-                if (cam.fov > 0)
-                {
-                    cam.fov--;
-                    cam.UpdateScreen();
-                }
+                cam.position.Y += 0.1f;
             }
         }
     }
