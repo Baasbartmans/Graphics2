@@ -121,13 +121,18 @@ namespace Template
             ClosestPrim(cam.position, direction, 0, out currentPrim, out distance);
 
             float recDist = 0;
+            Vector3 recDir;
             Primitive recPrim = null;
+            Vector3 origin = cam.position;
+            Vector3 recOrg;
 
             if (currentPrim is Sphere && currentPrim.reflective)
             {
-                SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere), recursionDepth, out recDist, out recPrim);
-                distance = recDist;
+                SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
+            //    distance = recDist;
                 currentPrim = recPrim;
+                origin = recOrg;
+                direction = recDir;
             }
 
 
@@ -167,7 +172,7 @@ namespace Template
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
-                            lightSum += LightSumCalc(l, direction, distance, angle, currentPrim);
+                            lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                             //Console.WriteLine(lightSum);
                             if (y == 0)
                                 if (x % (int)(debugMod) == 0)
@@ -184,7 +189,7 @@ namespace Template
                     if (currentPrim is Plane)
                     {
                         float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
-                        lightSum += LightSumCalc(l, direction, distance, angle, currentPrim);
+                        lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                     }
                     
                 }
@@ -283,7 +288,7 @@ namespace Template
 
         }
 
-        Vector3 LightSumCalc(Light l, Vector3 direction, float distance, float angle, Primitive prim)
+        Vector3 LightSumCalc(Light l, Vector3 direction, float distance, float angle, Primitive prim, Vector3 origin)
         {
             float lightSum = 0;
 
@@ -292,7 +297,7 @@ namespace Template
                 if (p is Sphere && p != prim)// || p is Sphere && sphereCount == 1)
                 {
                     Vector3 lightPoint = l.position;
-                    Vector3 intersectPoint = (direction * distance) + cam.position;
+                    Vector3 intersectPoint = (direction * distance) + origin;
                     Vector3 lineDirection = Vector3.Normalize((lightPoint - intersectPoint) + intersectPoint);
 
                     float check2 = Intersect(intersectPoint, lineDirection, p as Sphere, 0);
@@ -313,7 +318,7 @@ namespace Template
             return lightSum * l.color;
         }
 
-        public void SecRay(Vector3 origin, Vector3 direction, int recDepth, out float distance, out Primitive prim)
+        public void SecRay(Vector3 origin, Vector3 direction, int recDepth, out float distance, out Primitive prim, out Vector3 exitDir, out Vector3 exitOrg)
         {
             Primitive curPrim;
             float dist;
@@ -322,11 +327,13 @@ namespace Template
             {
                 if (curPrim.reflective && recDepth > 0)
                 {
-                    SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere), recDepth - 1, out dist, out curPrim);
+                    SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
                 }
             }
             distance = dist;
             prim = curPrim;
+            exitDir = direction;
+            exitOrg = (dist * direction) + origin;
         }
 
 
