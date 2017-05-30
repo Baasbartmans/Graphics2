@@ -4,54 +4,55 @@ using System.IO;
 using template;
 using OpenTK.Input;
 
-namespace Template {
+namespace Template
+{
 
     class Game
     {
-	    // member variables
-	    public Surface screen;
+        // member variables
+        public Surface screen;
         public Scene scene;
         public Camera cam = new Camera();
         public Surface displaySurf;
 
 
         Raytracer raytracer;
-	    // initialize
-	    public void Init()
-	    {
+        // initialize
+        public void Init()
+        {
             scene = new Scene();
-            displaySurf = new Surface(0,0);
+            displaySurf = new Surface(0, 0);
 
-            Light light2 = new Light(new Vector3(0, -3, 1), new Vector3(1, 1f, 1f));
+            Light light2 = new Light(new Vector3(-3, -10, 0), new Vector3(1, 1f, 1f));
             scene.lights.Add(light2);
 
-          //  Light light = new Light(new Vector3(-15f, -5, 0));
+            //  Light light = new Light(new Vector3(-15f, -5, 0));
             //scene.lights.Add(light);
 
-            
+
 
 
 
             Plane plane1 = new Plane(1, new Vector3(0, 1, 0), new Vector3(1, 1, 1), false);
             scene.primitives.Add(plane1);
 
-            //Plane plane2 = new Plane(3, new Vector3(-1, 0, 0), new Vector3(1, 1, 1), false);
-            //scene.primitives.Add(plane2);
+            Plane plane2 = new Plane(5, new Vector3(-1, 0, 0), new Vector3(1, 1, 1), false);
+            scene.primitives.Add(plane2);
 
-            //Plane plane3 = new Plane(3, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
-            //scene.primitives.Add(plane3);
+            Plane plane3 = new Plane(3, new Vector3(1, 0, 0), new Vector3(1, 1, 1), false);
+            scene.primitives.Add(plane3);
 
-            //Plane plane4 = new Plane(50, new Vector3(0, 0, 1), new Vector3(1, 1, 1), false);
-            //scene.primitives.Add(plane4);
+            Plane plane4 = new Plane(-10, new Vector3(0, 0, -1), new Vector3(1, 1, 1), false);
+            scene.primitives.Add(plane4);
 
-              Sphere sphere2 = new Sphere(new Vector3(0, 0, 1), 1, new Vector3(1, 1, 0.5f), true);
-            scene.primitives.Add(sphere2);
+              Sphere sphere2 = new Sphere(new Vector3(-1.5f, 0, -2), 1, new Vector3(1, 1, 0.5f), true);
+               scene.primitives.Add(sphere2);
+            
+             Sphere sphere1 = new Sphere(new Vector3(0, 0, 0), 1, new Vector3(0.5f, 1, 1), true, 100);
+             scene.primitives.Add(sphere1);
 
-           // Sphere sphere1 = new Sphere(new Vector3(-1.5f, 0, -1), 1, new Vector3(0.5f, 1, 1), false);
-            //scene.primitives.Add(sphere1);
-
-          // Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, -1), 1, new Vector3(1, 0.5f, 1), false);
-           //scene.primitives.Add(sphere3);
+            Sphere sphere3 = new Sphere(new Vector3(1.5f, 0, -2), 1, new Vector3(1, 0.5f, 1), true);
+            scene.primitives.Add(sphere3);
 
 
 
@@ -62,9 +63,9 @@ namespace Template {
             raytracer.screen = screen;
             raytracer.InitializeOutside();
         }
-	    // tick: renders one frame
-	    public void Tick()
-	    {
+        // tick: renders one frame
+        public void Tick()
+        {
             //scene.lights[0].position += new Vector3(1f,0,0);
 
             raytracer.Tick();

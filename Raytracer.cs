@@ -15,7 +15,7 @@ namespace Template
         public Camera cam;
         public Surface displaySurf;
 
-        int recursionDepth = 1;
+        int recursionDepth = 0;
 
         int sphereCount;
         int planeCount;
@@ -90,6 +90,7 @@ namespace Template
             int pixelColor = 0;
             float distAtten = 0;
             Vector3 lightSum = Vector3.Zero;
+            Vector3 baseSum = Vector3.Zero;
 
             float shortestDistance = 1000;//1000 should be replaced with the length limit of a ray
 
@@ -97,6 +98,9 @@ namespace Template
             float distance = 0;
             Primitive currentPrim = null;
             ClosestPrim(cam.position, direction, 0, out currentPrim, out distance);
+            Primitive basePrim = currentPrim;
+            float baseDist = distance;
+            Vector3 baseDir = direction;
 
             float recDist = 0;
             Vector3 recDir;
@@ -104,15 +108,44 @@ namespace Template
             Vector3 origin = cam.position;
             Vector3 recOrg;
 
+
+
             if (currentPrim is Sphere && currentPrim.reflective)
             {
-                SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
-            //    distance = recDist;
+
+                //bounce and normal debug
+                if (y == 0)
+                {
+                    if (x == 20)
+                    {
+                        Vector2 snorm = returnScreenCoordinates(Vector3.Normalize(((distance * direction) + cam.position) - currentPrim.position) * 2 + currentPrim.position);
+                        Vector2 mid = returnScreenCoordinates(currentPrim.position);
+                        screen.Line((int)mid.X, (int)mid.Y, (int)snorm.X, (int)snorm.Y, 0x00ff00);
+
+
+                        Vector3 bounce = Bounce(direction, distance, currentPrim as Sphere, cam.position);
+                        Vector2 begin = returnScreenCoordinates((distance * direction) + cam.position);
+                        Vector2 eind = returnScreenCoordinates(bounce + ((distance * direction) + cam.position));
+
+                        screen.Line((int)begin.X, (int)begin.Y, (int)eind.X, (int)eind.Y, 0x0000ff);
+                    }
+
+                }
+
+                SecRay((distance * direction) + cam.position, Bounce(direction, distance, currentPrim as Sphere, origin), recursionDepth, out recDist, out recPrim, out recDir, out recOrg);
+
+                if (recDist > 0)
+                    distance = recDist;
+
+                else
+                {
+                    lightSum += new Vector3(0.1f, 0.1f, 0.1f);
+                }
                 currentPrim = recPrim;
                 origin = recOrg;
                 direction = recDir;
             }
-            
+
 
             if (distance != 0 && currentPrim != null)
             {
@@ -130,12 +163,11 @@ namespace Template
 
 
                 Vector3 point = (distance * direction) - cam.position;
-
-                float angleSum = 0;
+                Vector3 basePoint = (baseDist * baseDir) - cam.position;
 
                 if (y == 0)
                 {
-                    if (x % 10 == 0)
+                    if (x == 20)
                     {
                         screenPosition = returnScreenCoordinates(cam.position + direction * shortestDistance);
                         screen.Line((int)screenCam.X, (int)screenCam.Y, (int)screenPosition.X, (int)screenPosition.Y, 0xff0000);
@@ -147,8 +179,10 @@ namespace Template
                 foreach (Light l in scene.lights)
                 {
                     Vector3 shadowRay = new Vector3(point - l.position);
+                    Vector3 baseRay = new Vector3(basePoint - l.position);
 
                     Vector3 lightDirection = Vector3.Normalize(shadowRay);
+                    Vector3 baselightDirection = Vector3.Normalize(baseRay);
 
                     if (currentPrim is Sphere)
                     {
@@ -157,9 +191,10 @@ namespace Template
                         if (angle > epsilon)
                         {
                             float distanceAttenuation = 1 - (1 / (shadowRay.Length * shadowRay.Length));
+                            if(!currentPrim.reflective)
                             lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
-                            //Console.WriteLine(lightSum);
-
+                            else
+                                lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position) + basePrim.color;
                         }
                     }
 
@@ -169,21 +204,34 @@ namespace Template
                         float angle = Vector3.Dot((currentPrim as Plane).normal, lightDirection);
                         lightSum += LightSumCalc(l, direction, distance, angle, currentPrim, cam.position);
                     }
-                    if(y == 0)
-                        if(x % 10 == 0)
+
+                    //bij partial reflection moet de basis ook berekend worden.
+                    //if (basePrim is Sphere && basePrim.reflective)
+                    //{
+                    //    Vector3 sphereNormal = Vector3.Normalize(basePrim.position - ((baseDir * baseDist) + cam.position));
+                    //    float angle = Vector3.Dot(sphereNormal, baselightDirection);
+                    //    if (angle > epsilon)
+                    //    {
+                    //        float distanceAttenuation = 1 - (1 / (baseRay.Length * baseRay.Length));
+                    //        baseSum += LightSumCalc(l, baseDir, baseDist, angle, basePrim, cam.position);
+                    //    }
+                    //}
+
+                    if (y == 0)
+                        if (x == 20)
                         {
                             Vector2 shadowRayScreenPosition = returnScreenCoordinates(cam.position + shadowRay);
                             screen.Line((int)screenPosition.X, (int)screenPosition.Y, (int)shadowRayScreenPosition.X, (int)shadowRayScreenPosition.Y, 0xffffff);
                         }
                 }
 
+                float red = 0, green = 0, blue = 0;
+
+                    red = 255 * (currentPrim.color.X * lightSum.X) * basePrim.color.X;
+                    green = 255 * (currentPrim.color.Y * lightSum.Y) * basePrim.color.Y;
+                    blue = 255 * (currentPrim.color.Z * lightSum.Z) * basePrim.color.Z;
 
 
-
-
-                float red = 255 * currentPrim.color.X * lightSum.X
-                    , green = 255 * currentPrim.color.Y * lightSum.Y
-                    , blue = 255 * currentPrim.color.Z * lightSum.Z;
 
                 red = Clamp(red, 0, 255);
                 green = Clamp(green, 0, 255);
@@ -209,7 +257,8 @@ namespace Template
             {
                 for (int y = -256; y < 256; y++)
                 {
-                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y,(x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
+
+                    pixelBuffer[(y + 256) * screen.width + (x + 256)] = AugustRay(x, y, (x * divX * cam.right) + (y * divY * cam.up) + cam.position + cam.direction, 4);//screenpoint inserted here
                 }//for loop y
             }//(for loop x)
 
@@ -264,14 +313,14 @@ namespace Template
 
             foreach (Primitive p in scene.primitives)
             {
-                if (p is Sphere && p != prim)// || p is Sphere && sphereCount == 1)
+                if (p is Sphere)
                 {
                     Vector3 lightPoint = l.position;
                     Vector3 intersectPoint = (direction * distance) + origin;
                     Vector3 lineDirection = Vector3.Normalize((lightPoint - intersectPoint) + intersectPoint);
 
                     float check2 = Intersect(intersectPoint, lineDirection, p as Sphere, 0);
-                    if (check2 != 0 && check2 > 0)
+                    if (check2 != 0 && check2 > 0 + epsilon)
                     {
                         return Vector3.Zero;
                     }
@@ -297,9 +346,14 @@ namespace Template
             {
                 if (curPrim.reflective && recDepth > 0)
                 {
-                    SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
+                    SecRay((dist * direction) + origin, Bounce(direction, dist, curPrim as Sphere, origin), recDepth - 1, out dist, out curPrim, out exitDir, out exitOrg);
                 }
             }
+            if (curPrim is Sphere)
+            {
+                int g = 0;
+            }
+
             distance = dist;
             prim = curPrim;
             exitDir = direction;
@@ -325,7 +379,7 @@ namespace Template
                 }
 
                 //of er is niks ingevuld, of er is een lagere waarde ingevuld
-                if (currentDistance != 0)
+                if (currentDistance > 0)
                 {
                     if (thisdistance != 0)
                     {
@@ -364,27 +418,6 @@ namespace Template
             return a;
         }
 
-        //public bool NoShadowIntersect(Scene scene, Primitive s, Vector3 point, Vector3 shadowRay, Light l, out Primitive p)
-        //{
-        //    Vector3 direction = Vector3.Normalize(l.position - point);
-
-        //    foreach (Primitive snew in scene.primitives)
-        //    {
-        //        if (snew is Sphere)
-        //        {
-        //            float length = Intersect(point, direction, snew as Sphere, recursionDepth, Vector3.Zero);
-        //            if (length < (l.position - point).Length && length > 0)
-        //            {
-        //                p = snew;
-        //                return false;
-        //            }
-        //        }
-        //    }
-        //    p = null;
-        //    return true;
-        //}
-
-
         public float Intersect(Vector3 lineOrigin, Vector3 direction, Sphere sphere, int recDepth)
         {
             Vector3 difference = lineOrigin - sphere.position;
@@ -397,25 +430,15 @@ namespace Template
             {
                 float distance = -Vector3.Dot(direction, lineOrigin - sphere.position) - (float)Math.Sqrt(discriminant);
 
-                //if (sphere.reflective && recDepth > 0)
-                //{
-                //    Vector3 sphereNorm = (direction * distance) - sphere.position;
-                //    Vector3 newDir = direction - (sphereNorm * (Vector3.Dot(direction, sphereNorm)) * 2);
-                //    Primitive hitPrim;
-                //    //aanpassen
-                //    ClosestPrim((direction * distance) + lineOrigin, newDir, recDepth - 1, out hitPrim, out distance);
-                //    return distance;
-                //}
-
                 return distance;
             }
             return 0;
         }
 
-        public Vector3 Bounce(Vector3 direction, float distance, Sphere sphere)
+        public Vector3 Bounce(Vector3 direction, float distance, Sphere sphere, Vector3 origin)
         {
-            Vector3 sphereNorm = (direction * distance) - sphere.position;
-            return direction - (sphereNorm * (Vector3.Dot(direction, sphereNorm)) * 2);
+            Vector3 sphereNorm = Vector3.Normalize((direction * distance + origin) - sphere.position);
+            return Vector3.Normalize(direction - (sphereNorm * (Vector3.Dot(direction, sphereNorm)) * 2));
         }
 
         public float IntersectPlane(Plane p, Vector3 line, Vector3 origin, Vector3 point)
